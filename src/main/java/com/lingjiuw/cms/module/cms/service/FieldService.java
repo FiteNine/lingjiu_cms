@@ -19,9 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * 字段定义（cms_field）：某个内容类型下的自定义字段，见 static-publish.md §2.2。
@@ -60,6 +63,7 @@ public class FieldService {
         checkCodeUnique(typeCode, code);
         CmsField field = new CmsField();
         applyRequest(field, request);
+        checkEnumOptions(field.getFieldType(), field.getOptions());
         field.setSiteId(SiteContext.siteId());
         try {
             fieldMapper.insert(field);
@@ -78,6 +82,7 @@ public class FieldService {
             throw new BizException("字段名与所属类型创建后不能修改：" + field.getCode());
         }
         applyRequest(field, request);
+        checkEnumOptions(field.getFieldType(), field.getOptions());
         fieldMapper.updateById(field);
     }
 
@@ -122,6 +127,64 @@ public class FieldService {
     /** 开关类字段的默认值：新建（库里还没有值）写 0，编辑时保留库里已有的值 */
     private static Integer keep(Integer current) {
         return current == null ? 0 : current;
+    }
+
+    /**
+     * ENUM / ENUM_MULTI 的 options 是"值[:标签]"逗号分隔的语法，ContentService.enumValues 只认半角
+     * 逗号与半角冒号：多余的逗号、全角冒号与重复值存进去后会让取值静默变形，所以写库前按同一口径拦下。
+     */
+    private static void checkEnumOptions(String fieldType, String options) {
+        if (!isEnumType(fieldType)) {
+            return;
+        }
+        if (!StringUtils.hasText(options)) {
+            throw new BizException("枚举类型必须配置选项（值[:标签]，逗号分隔）");
+        }
+        String[] pieces = options.split(",", -1);
+        List<String> items = new ArrayList<>(pieces.length);
+        for (String piece : pieces) {
+            String item = piece.trim();
+            if (item.isEmpty()) {
+                throw new BizException("选项存在空项，请检查多余的逗号");
+            }
+            items.add(item);
+        }
+        for (String item : items) {
+            if (item.indexOf('：') >= 0) {
+                throw new BizException("选项请使用半角冒号");
+            }
+        }
+        List<String> values = new ArrayList<>(items.size());
+        for (String item : items) {
+            int colon = item.indexOf(':');
+            String value = colon < 0 ? item : item.substring(0, colon).trim();
+            if (value.isEmpty()) {
+                throw new BizException("存在没有值的选项");
+            }
+            values.add(value);
+        }
+        if (ContentService.enumValues(options).size() < values.size()) {
+            Set<String> seen = new HashSet<>();
+            for (String value : values) {
+                if (!seen.add(value)) {
+                    throw new BizException("选项值重复：" + value);
+                }
+            }
+        }
+    }
+
+    /** 与 ContentService.fieldType 同口径：按枚举名忽略大小写与空白匹配，表外取值不算枚举类型。 */
+    private static boolean isEnumType(String fieldType) {
+        if (fieldType == null || fieldType.isBlank()) {
+            return false;
+        }
+        String text = fieldType.trim();
+        for (FieldType type : FieldType.values()) {
+            if (type.name().equalsIgnoreCase(text)) {
+                return type == FieldType.ENUM || type == FieldType.ENUM_MULTI;
+            }
+        }
+        return false;
     }
 
     /** 字段类型必须是 §2.2 的 19 个之一；库里统一存大写，引擎匹配时不区分大小写 */

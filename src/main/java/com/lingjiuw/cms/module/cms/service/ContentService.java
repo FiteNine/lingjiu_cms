@@ -41,6 +41,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -160,6 +161,8 @@ public class ContentService {
         content.setUpdateTime(now);
         checkSingleContent(type, null);
         checkSlugUnique(content);
+        // 新建时自身还没有 id：只校验父级存在、属于当前站点且同类型
+        checkParent(content.getId(), content.getTypeCode(), content.getParentId());
         contentMapper.insertContent(content);
         syncRelations(content, data, request);
     }
@@ -177,6 +180,7 @@ public class ContentService {
         content.setUpdateTime(LocalDateTime.now());
         checkSingleContent(type, id);
         checkSlugUnique(content);
+        checkParent(id, content.getTypeCode(), content.getParentId());
         contentMapper.updateContent(content);
         syncRelations(content, data, request);
     }
@@ -184,6 +188,13 @@ public class ContentService {
     @Transactional
     public void delete(Long id) {
         requireContent(id);
+        // 删父后子内容挂不到任何根上（内容树遍历里整条子树静默消失），先挡住
+        Long children = contentMapper.selectCount(Wrappers.<CmsContent>lambdaQuery()
+                .eq(CmsContent::getParentId, id)
+                .eq(CmsContent::getSiteId, SiteContext.siteId()));
+        if (children != null && children > 0) {
+            throw new BizException("存在子内容，不能删除");
+        }
         // 逻辑删除内容本身；关联与索引行一并清掉，否则发布引擎仍会从索引表里读到它
         contentMapper.deleteById(id);
         clearRelations(id);
@@ -299,6 +310,36 @@ public class ContentService {
         }
     }
 
+    /**
+     * 上级内容必须存在、属于当前站点、与当前内容同类型，且不能是自身或自身的后代：
+     * 成环后这条链上的内容既不会被挂到任何根上，也不会出现在内容树的遍历结果里。
+     */
+    private void checkParent(Long id, String typeCode, Long parentId) {
+        if (parentId == null || parentId <= 0) {
+            return;
+        }
+        if (parentId.equals(id)) {
+            throw new BizException("父级内容不能选择自身");
+        }
+        Set<Long> seen = new HashSet<>();
+        Long cursor = parentId;
+        while (cursor != null && cursor > 0 && seen.add(cursor)) {
+            if (cursor.equals(id)) {
+                throw new BizException("父级内容不能选择自己的下级");
+            }
+            CmsContent parent = contentMapper.selectOne(Wrappers.<CmsContent>lambdaQuery()
+                    .eq(CmsContent::getId, cursor)
+                    .eq(CmsContent::getSiteId, SiteContext.siteId()));
+            if (parent == null) {
+                throw new BizException("父级内容不存在或已被删除");
+            }
+            if (!typeCode.equals(parent.getTypeCode())) {
+                throw new BizException("父级内容必须与当前内容属于同一类型");
+            }
+            cursor = parent.getParentId();
+        }
+    }
+
     private void validateData(CmsContentType type, Map<String, Object> data) {
         normalizedData(type, data);
     }
@@ -359,7 +400,7 @@ public class ContentService {
             }
             case ENUM -> {
                 String value = textOf(raw);
-                if (!enumValues(field).contains(value)) {
+                if (!enumValues(field.getOptions()).contains(value)) {
                     throw new BizException("字段「" + field.getLabel() + "」的取值不在选项里：" + value);
                 }
                 return value;   // §2.2：ENUM 存存储值，不存标签
@@ -624,10 +665,12 @@ public class ContentService {
         return FieldType.TEXT;
     }
 
-    /** ENUM / ENUM_MULTI 的选项取值（{@code "值:标签"} 逗号分隔，§2.2）。 */
-    private static Set<String> enumValues(CmsField field) {
+    /**
+     * ENUM / ENUM_MULTI 的选项取值（{@code "值:标签"} 逗号分隔，§2.2）：值取冒号前一段，空项跳过。
+     * FieldService 保存字段定义时按同一口径校验选项，所以解析口子收在这里。
+     */
+    static Set<String> enumValues(String options) {
         Set<String> values = new LinkedHashSet<>();
-        String options = field.getOptions();
         if (options == null || options.isBlank()) {
             return values;
         }
