@@ -1,0 +1,12 @@
+{
+  "name": "mint",
+  "version": "1.0.0",
+  "engine": ">=2.2",
+  "author": "lingjiuw",
+  "description": "薄荷 · 清透编辑风主题：覆盖 static-publish.md §6.1 全部 14 个标签",
+  "requires": {
+    "types": ["article", "product", "book", "chapter", "author", "about", "contact", "single"],
+    "pages": ["HOME", "LIST", "TAGLIST", "TAGPAGE", "ARCHIVE", "DETAIL", "SINGLE", "FACET", "SEARCH", "STATIC", "404", "feed"],
+    "options": ["pages.static", "facets.combos", "url.facet", "pager.labels"]
+  }
+}

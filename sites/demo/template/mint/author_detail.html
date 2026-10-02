@@ -1,0 +1,58 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb withContent='1'}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+
+      <!-- 作者是内置内容类型 author，作者页就是它的详情页（§2.1） -->
+      {cms:detail}
+      <header class="author-box">
+        {cms:if field='avatar'}
+        <img class="author-box__avatar" src="[field:avatar size='thumb'/]" alt="[field:title/]" width="160" height="160" loading="lazy" decoding="async">
+        {cms:else/}
+        <span class="author-box__avatar author-box__avatar--blank" aria-hidden="true">[field:title maxlen='1'/]</span>
+        {/cms:if}
+        <div class="author-box__body">
+          <p class="author-box__eyebrow">作者 · author_detail.html</p>
+          <h1 class="author-box__name">[field:title/]</h1>
+          {cms:if field='honor'}<p class="author-box__honor">[field:honor/]</p>{/cms:if}
+          {cms:if field='bio'}<p class="author-box__bio">[field:bio/]</p>{/cms:if}
+          <p class="author-box__stats">
+            <span>作品 [field:childCount/] 篇</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span>[field:updatedDaysAgo/] 天前更新</span>
+          </p>
+        </div>
+      </header>
+      {/cms:detail}
+
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">TA 的文章</h2>
+          <p class="section__note">relate='field:authorId'，可分页</p>
+        </div>
+        {cms:if field='page.empty'}<p class="notice notice--empty">这位作者还没有文章</p>{/cms:if}
+        <div class="card-grid card-grid--2">
+        {cms:list type='article' category='all' relate='field:authorId' row='6' orderby='publishTime desc'}
+          {cms:include file='card.html' size='big'/}
+        {/cms:list}
+        </div>
+        {cms:include file='pager.html'/}
+      </section>
+
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

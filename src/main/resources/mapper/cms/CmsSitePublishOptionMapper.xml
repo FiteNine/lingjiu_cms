@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsSitePublishOptionMapper">
+
+    <!--
+      按站点播种发布选项（static-publish.md §2.7 的 47 行表，展开为 55 个键）。
+      值由 Java 侧 SiteBootstrapService 的常量表传入，与迁移
+      V20261002090011__cms_site_seed.sql 里的字面量必须一致；
+      已存在同 option_code 的（未删）选项则跳过——用 on conflict 而不是
+      "insert ... select ... where not exists"：后者是先查后插，并发播种（或与迁移/其它
+      播种路径并发）时两个事务会同时判定"不存在"，撞上 uk_cms_site_publish_option 抛唯一冲突，
+      让整个 @Transactional seed() 回滚。谓词必须与部分唯一索引一致（where deleted = 0）。
+    -->
+    <insert id="seedDefaults">
+        insert into cms_site_publish_option (site_id, option_code, value)
+        select #{siteId}, v.option_code, v.value
+          from (values
+        <foreach collection="options" item="o" separator=",">
+            (#{o.optionCode,jdbcType=VARCHAR}::varchar, #{o.value,jdbcType=VARCHAR}::text)
+        </foreach>
+          ) as v(option_code, value)
+        on conflict (site_id, option_code) where deleted = 0 do nothing
+    </insert>
+
+</mapper>

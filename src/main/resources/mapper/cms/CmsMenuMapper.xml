@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsMenuMapper">
+
+    <!-- 按站点播种默认菜单（static-publish.md §2.4）：已存在同 code 的（未删）菜单则跳过 -->
+    <insert id="seedDefaultMenu">
+        insert into cms_menu (site_id, code, name, status, sort)
+        select #{siteId}, #{code}, #{name}, 1, 1
+         where not exists (select 1 from cms_menu x
+                            where x.site_id = #{siteId} and x.code = #{code} and x.deleted = 0)
+    </insert>
+
+</mapper>

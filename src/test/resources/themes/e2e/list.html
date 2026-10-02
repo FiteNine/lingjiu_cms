@@ -1,0 +1,22 @@
+{cms:include file='header.html'/}
+<nav class="breadcrumb">
+{cms:breadcrumb}
+  <a class="[field:class/]" href="[field:url/]">[field:name/]</a>
+{/cms:breadcrumb}
+</nav>
+<h1 class="channel-title">[field:channel.label/]</h1>
+<ul class="news">
+{cms:list row='2'}
+  <li class="card [field:class/]">
+    <a href="[field:url/]">[field:title/]</a>
+    <time>[field:publishTime format='Y-m-d'/]</time>
+  </li>
+{/cms:list}
+</ul>
+{cms:if field='page.empty'}<p class="empty">该栏目暂无内容</p>{/cms:if}
+<nav class="pager">
+{cms:pagelist}
+  <a class="[field:class/]" href="[field:url/]" rel="[field:rel/]">[field:label/]</a>
+{/cms:pagelist}
+</nav>
+{cms:include file='footer.html'/}

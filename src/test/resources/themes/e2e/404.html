@@ -1,0 +1,8 @@
+{cms:include file='header.html'/}
+<h1 class="title">页面不存在</h1>
+<p class="not-found">找不到 [field:page.url/]。</p>
+{cms:query type='article' category='all' row='3' name='latest'}
+  <a href="[field:url/]">[field:title/]</a>
+{/cms:query}
+{cms:if field='query.latest.empty'}<p class="empty">暂无内容</p>{/cms:if}
+{cms:include file='footer.html'/}

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>灵久演示站</title>
+  <link>https://demo.lingjiuw.local/</link>
+  <description>静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</description>
+  <language>zh-CN</language>
+  <lastBuildDate>Fri, 02 Oct 2026 17:11:32 +0800</lastBuildDate>
+  <item>
+    <title>发布批次与回滚</title>
+    <link>https://demo.lingjiuw.local/news/release-and-rollback.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/release-and-rollback.html</guid>
+    <description><![CDATA[<p>静态发布的风险不在"生成失败"，而在"生成成功但生成错了"。</p>
+<h2>批次是一等公民</h2>
+<p>每次发布是一个批次，产物落到该批次的目录下；保留最近几批，回滚就是切一次软链。</p>
+<h3>预发布</h3>
+<p>开启预发布后产物先写预览目录，人工点一遍确认没有破版再提升，正式目录全程不动。</p>
+<h2>产物清单</h2>
+<p>清单记录本次生成了哪些文件与它们的哈希，回收与回滚都以它为准，不靠目录扫描。</p>
+<h2>结论</h2>
+<p>能一键回滚的发布流程，才敢让运营自己点发布按钮。</p>]]></description>
+    <pubDate>Sat, 28 Mar 2026 16:05:00</pubDate>
+  </item>
+  <item>
+    <title>图集与详情页的排版</title>
+    <link>https://demo.lingjiuw.local/case/gallery-and-album.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/case/gallery-and-album.html</guid>
+    <description><![CDATA[<p>图集字段存的是有序数组，首图与全部图片是同一个字段的两种取法。</p>
+<h2>数组顺序就是录入顺序</h2>
+<p>不排序、不打散，编辑拖一次顺序结果就变了，模板不需要额外的排序参数。</p>
+<h3>无障碍文本</h3>
+<p>每张图带 alt，为空时回退到当前内容标题；这是模板一行都不该省的地方。</p>
+<h2>懒加载</h2>
+<p>详情页图集默认懒加载，首屏只加载第一张，剩下的交给浏览器。</p>
+<h2>结论</h2>
+<p>把排版差异交给字段与模板，不要交给运行时的条件判断。</p>]]></description>
+    <pubDate>Sat, 21 Mar 2026 10:30:00</pubDate>
+  </item>
+  <item>
+    <title>媒体派生尺寸怎么算</title>
+    <link>https://demo.lingjiuw.local/news/tech/media-and-derived-sizes.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/tech/media-and-derived-sizes.html</guid>
+    <description><![CDATA[<p>列表页要缩略图，详情页要原图，正文里还要一张中等宽度——同一张图三份尺寸。</p>
+<h2>派生档位</h2>
+<p>长边三档，由站点选项声明；改档位要重建派生文件，因此这项改动会写进发布报告。</p>
+<h3>元数据同批入库</h3>
+<p>宽高在入库时读出，模板才能提前给 img 写好尺寸，避免布局抖动。</p>
+<h2>URL 前缀可配</h2>
+<p>本地托管走站内路径，接 CDN 时只改一个选项，内容与模板都不用动。</p>
+<h2>结论</h2>
+<p>媒体是静态站里最容易被忽略的部分，也是体积的主要来源；先把档位定死，再谈优化。</p>]]></description>
+    <pubDate>Sat, 14 Mar 2026 14:55:00</pubDate>
+  </item>
+  <item>
+    <title>把导航做成数据</title>
+    <link>https://demo.lingjiuw.local/news/menu-as-data.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/menu-as-data.html</guid>
+    <description><![CDATA[<p>导航是数据而不是模板里的硬编码，改导航就不用改模板、不用重新编译前端。</p>
+<h2>菜单项的指向</h2>
+<p>可以指向分类、内容、类型列表页、标签、归档、作者或外链；指向什么就写什么，模板不关心差异。</p>
+<h3>当前页高亮</h3>
+<p>引擎比对菜单项解析出的 URL 与当前页面 URL 得出结论，模板里不写比较。</p>
+<h2>代价</h2>
+<p>菜单属于数据，改菜单等于全站导航失效，因此走一次增量发布；换来的是运营能自己改。</p>
+<h2>结论</h2>
+<p>能交给数据的就不放进模板，这是静态站长期可维护的前提。</p>]]></description>
+    <pubDate>Sun, 08 Mar 2026 11:25:00</pubDate>
+  </item>
+  <item>
+    <title>筛选落地页是配置出来的</title>
+    <link>https://demo.lingjiuw.local/case/facet-pages-are-configured.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/case/facet-pages-are-configured.html</guid>
+    <description><![CDATA[<p>两个字段各十个取值，全排列就是一百个页面，其中九十个是空壳。</p>
+<h2>只声明要的组合</h2>
+<p>组合写在站点选项里，一条组合一个落地页；取值没有内容时不生成，避免空页面进收录。</p>
+<h3>页面上限与取值上限</h3>
+<p>两个上限分别兜住"组合爆炸"与"取值太散"，超限直接报错而不是悄悄少生成。</p>
+<h2>筛选页要不要收录</h2>
+<p>默认不收录，由站点选项统一控制；行业站想让价格对比页被搜到，再逐个放开。</p>
+<h2>结论</h2>
+<p>筛选页是运营配置，不是引擎的自动行为——这一点决定了它不会失控。</p>]]></description>
+    <pubDate>Tue, 03 Mar 2026 09:40:00</pubDate>
+  </item>
+  <item>
+    <title>正文分页与目录的配合</title>
+    <link>https://demo.lingjiuw.local/news/tech/toc-and-body-pagination.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/tech/toc-and-body-pagination.html</guid>
+    <description><![CDATA[<p>长正文拆页之后，页面之间要有明确的导航，读者才不会以为文章到这里就结束了。</p>
+<h2>分页符的位置</h2>
+<p>分页符插在段落之间，插入点由编辑决定；引擎只在它出现的地方断页，不做自动均衡。</p>
+<h3>锚点必须稳定</h3>
+<p>目录锚点用引擎生成的编号而不是标题文本，中文标题做锚点会产出需要编码的乱码链接。</p>
+<h2>与 canonical 的关系</h2>
+<p>每一页的 canonical 指向自己，第 2 页之后是否收录由站点选项决定。</p>
+<h2>结论</h2>
+<p>正文分页是内容问题，不是模板问题：结构清楚的文章，拆页之后每一页都能独立阅读。</p>]]></description>
+    <pubDate>Fri, 27 Feb 2026 16:20:00</pubDate>
+  </item>
+  <item>
+    <title>没有分词器也能搜索</title>
+    <link>https://demo.lingjiuw.local/news/search-index-without-tokenizer.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/search-index-without-tokenizer.html</guid>
+    <description><![CDATA[<p>引入分词器意味着多一个依赖、多一份词典、多一种"不同环境结果不同"的可能。</p>
+<h2>产物形态</h2>
+<p>索引按固定条数切片，每片一个 JSON 数组；清单文件给出片数与版本号，前端按需拉取。</p>
+<h3>字段用短名</h3>
+<p>索引体积是这条链路上最贵的资源，字段名从 title 缩到 t 省下的是实打实的带宽。</p>
+<h2>匹配策略</h2>
+<p>中文按字包含匹配天然正确，英文按词前缀匹配；搜不到同义词与拼音，这一条如实写在搜索页上。</p>
+<h2>结论</h2>
+<p>五万条以内纯前端足够；再往上切接口模式，索引产物仍然生成，作为降级路径。</p>]]></description>
+    <pubDate>Sun, 22 Feb 2026 13:10:00</pubDate>
+  </item>
+  <item>
+    <title>渲染作用域与字段解析</title>
+    <link>https://demo.lingjiuw.local/news/tech/render-scope-and-field.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/tech/render-scope-and-field.html</guid>
+    <description><![CDATA[<p>作用域栈的规则只有一句：从最内层往外找，找到即止，找不到就报错。</p>
+<h2>三层作用域</h2>
+<p>循环项、页面上下文、站点上下文。嵌套循环时以内层为准，需要外层时用显式前缀。</p>
+<h3>找不到即报错</h3>
+<p>静默输出空串会把错误推到线上，编译期把字段名与实际定义对照一次，代价极小。</p>
+<h2>派生字段的位置</h2>
+<p>URL、分类、标签、作者、正文计量这些都是引擎算出来的，模板直接用，不做条件判断。</p>
+<h2>结论</h2>
+<p>把"怎么算"留在引擎里，模板里只剩"放在哪"。</p>]]></description>
+    <pubDate>Mon, 16 Feb 2026 10:45:00</pubDate>
+  </item>
+  <item>
+    <title>内容类型不是数据库表</title>
+    <link>https://demo.lingjiuw.local/news/content-type-metadata.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/content-type-metadata.html</guid>
+    <description><![CDATA[<p>"每个类型建一张表"是最直觉的做法，也是最难维护的做法：字段一改就要 DDL，两个环境的结构迟早不一致。</p>
+<h2>元数据化的代价</h2>
+<p>值不再有列级约束，类型校验落到应用层；换来的是加字段不需要停机、发布不需要改表。</p>
+<h3>索引表承担筛选</h3>
+<p>声明了可筛选的字段，每个取值写一行索引；查询只读索引表，计划因此稳定。</p>
+<h2>写放大会到多少</h2>
+<p>一条内容多出十几行索引行，相对一次发布要生成的文件数，这个量级可以接受。</p>
+<h2>结论</h2>
+<p>代价如实记录，收益是表结构稳定——而表结构的稳定是长期运维里最贵的东西。</p>]]></description>
+    <pubDate>Mon, 09 Feb 2026 15:30:00</pubDate>
+  </item>
+  <item>
+    <title>改一条内容，重发几个页面</title>
+    <link>https://demo.lingjiuw.local/case/incremental-dependency.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/case/incremental-dependency.html</guid>
+    <description><![CDATA[<p>全量重建在几百篇内容时还能忍，上千篇之后就会变成发布窗口的主要成本。</p>
+<h2>先有依赖，再谈增量</h2>
+<p>输入依赖清单记录"这个页面读了哪些内容、哪些模板、哪些选项"，反向索引则回答"这条内容变了，谁需要重发"。</p>
+<h3>模板也算输入</h3>
+<p>改一行公共头部会让所有引用它的页面失效，依赖清单里必须包含展开后的模板字节。</p>
+<h2>依赖算不准时的退路</h2>
+<p>算不准就向上取整：宁可多发几个页面，也不要漏发一个。漏发表现为"内容改了线上没变"，最难排查。</p>
+<h2>结论</h2>
+<p>增量不是优化技巧，是正确性问题；先保证不漏，再谈少发。</p>]]></description>
+    <pubDate>Tue, 03 Feb 2026 11:00:00</pubDate>
+  </item>
+  <item>
+    <title>URL 规则与产物路径的映射</title>
+    <link>https://demo.lingjiuw.local/news/tech/url-pattern-and-output-path.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/tech/url-pattern-and-output-path.html</guid>
+    <description><![CDATA[<p>URL 规则里能出现哪些占位符是一份封闭清单，清单外的一律在编译期报错。</p>
+<h2>占位符白名单</h2>
+<p>slug、id、父 slug、排序号、分类路径、类型 code、年月日、标签 slug、筛选路径、页码。清单之外没有例外。</p>
+<h3>第 1 页不含页码</h3>
+<p>删除页码占位符时连同紧邻的一个分隔符一起删，规则是逐字符的，不是"截断到某个位置"。</p>
+<h2>路径映射写死</h2>
+<p>以斜杠结尾的 URL 只映射到 index.html，不再生成同名文件；尾斜杠唯一，不需要服务器做二次猜测。</p>
+<h2>结论</h2>
+<p>把规则集中在一处实现，模板与文档都不许自己拼路径。</p>]]></description>
+    <pubDate>Tue, 27 Jan 2026 09:15:00</pubDate>
+  </item>
+  <item>
+    <title>从内容到文件：页面计划是怎么生成的</title>
+    <link>https://demo.lingjiuw.local/news/tech/page-plan-and-derived-pages.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/tech/page-plan-and-derived-pages.html</guid>
+    <description><![CDATA[<p>分页不是渲染时"顺手多渲染几次"，而是计划期就已经算清楚的一件事。</p>
+<h2>计划期先固化四件事</h2>
+<p>页面类型、上下文来源、输出路径、分页号。四件事定了，渲染就只是执行。</p>
+<h3>分页主体只有一个</h3>
+<p>一个模板至多一个可分页的列表，否则第 2 页该取哪一段数据无法判定。</p>
+<h2>派生页与主页面同模板</h2>
+<p>主页面渲染一次，派生页只覆盖页号重渲染；模板不需要为第 2 页写第二份。</p>
+<h2>冲突在计划期就报</h2>
+<p>两个来源映射到同一路径时直接失败，宁可不发布，也不发布一个被覆盖的页面。</p>]]></description>
+    <pubDate>Mon, 19 Jan 2026 14:40:00</pubDate>
+  </item>
+  <item>
+    <title>用标签语言描述页面结构</title>
+    <link>https://demo.lingjiuw.local/news/tech/tag-language-for-pages.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/tech/tag-language-for-pages.html</guid>
+    <description><![CDATA[<p>模板语法每多一条能力，模板作者的认知负担就多一层。把能力收在标签参数里，模板就退化成一份可读的结构描述。</p>
+<h2>五类词法元素</h2>
+<p>文本、标签、字段、注释、字面量。五种之外不再增加，插值一律通过字段标签完成。</p>
+<h3>参数只写字面量</h3>
+<p>参数不做字段插值，因此一个模板的查询目标在编译期就能确定，缓存键也就能算出来。</p>
+<h2>为什么不做表达式</h2>
+<p>一旦允许在模板里算，业务规则就会分裂到模板与后端两处，两边都不知道对方改了什么。</p>
+<h2>结论</h2>
+<p>表达能力放在字段定义里，模板只负责组装结构，这样换主题才不用重写业务。</p>]]></description>
+    <pubDate>Sun, 11 Jan 2026 10:05:00</pubDate>
+  </item>
+  <item>
+    <title>静态站点的第一次访问为什么更快</title>
+    <link>https://demo.lingjiuw.local/static-first-byte.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/static-first-byte.html</guid>
+    <description><![CDATA[<p>把同一篇文章分别放在动态站与静态站上，第一次访问的差异并不来自数据库快不快，而来自"要经过多少环节才能把第一个字节交出去"。</p>
+<h2>请求链路的长度</h2>
+<p>动态请求要经过路由、鉴权、查询、模板渲染四段，任何一段排队，首字节都会被推后。静态请求只有"打开文件、读出来"两段。</p>
+<h3>排队从哪里来</h3>
+<p>来自并发：单条查询只要十毫秒，一百个请求同时到达就会排在同一个连接池后面。</p>
+<h2>缓存解决不了的部分</h2>
+<p>页面级缓存能覆盖大部分情况，但缓存失效与回源仍然要回到同一条链路上，而且冷启动时第一个访客承担全部代价。</p>
+<h3>静态产物把代价前移</h3>
+<p>内容变更时重新生成一次文件，之后的每一次访问都不再触发渲染。</p>
+<h2>结论</h2>
+<p>先量化，再决定：把首字节时间按链路分段测量，静态化能省掉的那几段会自己浮现出来。</p>]]></description>
+    <pubDate>Tue, 06 Jan 2026 09:20:00</pubDate>
+  </item>
+</channel>
+</rss>

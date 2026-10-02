@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>产品 · 灵久演示站</title>
+<meta name="description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
+<meta name="keywords" content="静态站点,内容管理,Java,模板引擎">
+<meta name="theme-color" content="#0f7a68">
+<link rel="canonical" href="https://demo.lingjiuw.local/product/">
+
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="灵久演示站">
+<meta property="og:title" content="产品">
+<meta property="og:url" content="https://demo.lingjiuw.local/product/">
+<meta property="og:image" content="">
+<meta property="og:description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
+<link rel="alternate" type="application/rss+xml" title="灵久演示站 订阅" href="/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+</head>
+<body class="page">
+<a class="skip-link" href="#main">跳到主内容</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true">灵</span>
+      <span class="brand__text">
+        <span class="brand__name">灵久演示站</span>
+        <span class="brand__tag">静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</span>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+      <span class="sr-only">展开导航</span>
+    </button>
+    <nav class="main-nav" id="main-nav" aria-label="主导航">
+      <ul class="main-nav__list">
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/" aria-current="">首页</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/news/" aria-current="">新闻</a>
+          
+        </li>
+      
+        <li class="main-nav__item active">
+          <a class="main-nav__link" href="/product/" aria-current="page">产品</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/book/" aria-current="">书籍</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/author/" aria-current="">作者</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/about/" aria-current="">关于</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/contact/" aria-current="">联系</a>
+          
+        </li>
+      
+      </ul>
+      <form class="nav-search" action="/search/" method="get" role="search" data-cms-search>
+        <label class="sr-only" for="nav-q">站内搜索</label>
+        <input class="nav-search__input" id="nav-q" type="search" name="q" placeholder="搜索…" autocomplete="off">
+        <button class="nav-search__btn" type="submit">搜索</button>
+      </form>
+    </nav>
+  </div>
+</header>
+<main class="site-main" id="main">
+
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    
+      <li class="crumbs__item ">
+      <a class="crumbs__link" href="/">灵久演示站</a>
+      </li>
+    
+      <li class="crumbs__item current">
+      <span class="crumbs__current" aria-current="page">产品</span>
+      </li>
+    
+    </ol>
+  </nav>
+
+  <header class="page-head">
+    <p class="page-head__eyebrow">产品类型列表页 · product_list.html</p>
+    <h1 class="page-head__title">产品</h1>
+    <p class="page-head__meta">9 款产品 · 只显示有货的规格（where='stock:gt:0'）</p>
+  </header>
+
+  <!-- 筛选取值条：source='facet'；urlWith 只在 facets.combos 声明过的组合上非空（§6.3） -->
+  <section class="facet-bar">
+    <div class="facet-bar__group">
+      <p class="facet-bar__label">品牌</p>
+      <div class="facet-bar__values">
+      
+        <a class="facet-chip " href="/f/brand-acme/" aria-current="">Acme<span class="facet-chip__count">3</span></a>
+      
+        <a class="facet-chip " href="/f/brand-globex/" aria-current="">Globex<span class="facet-chip__count">3</span></a>
+      
+        <a class="facet-chip " href="/f/brand-initech/" aria-current="">Initech<span class="facet-chip__count">3</span></a>
+      
+      </div>
+    </div>
+    <div class="facet-bar__group">
+      <p class="facet-bar__label">地区</p>
+      <div class="facet-bar__values">
+      
+        <a class="facet-chip " href="/f/region-huadong/" aria-current="">华东<span class="facet-chip__count">4</span></a>
+      
+        <a class="facet-chip " href="/f/region-huanan/" aria-current="">华南<span class="facet-chip__count">3</span></a>
+      
+        <a class="facet-chip " href="/f/region-huabei/" aria-current="">华北<span class="facet-chip__count">2</span></a>
+      
+      </div>
+    </div>
+    <p class="facet-bar__hint">筛选落地页见 <a href="/f/brand-acme+region-huadong/">品牌 + 地区的组合页</a></p>
+  </section>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      
+      <div class="card-grid card-grid--3">
+      
+        <article class="card card--product ">
+          <a class="card__figure" href="/product/initech-form-relay.html" tabindex="-1" aria-hidden="true">
+          
+            <img class="card__img" src="/uploads/demo/product-09.jpg" alt="Initech 表单中转站" width="320" height="200" loading="lazy" decoding="async">
+          
+          </a>
+          <div class="card__body">
+            <p class="card__eyebrow">
+              <span class="card__type">Initech</span>
+              <span class="card__region">华南</span>
+              
+            </p>
+            <h3 class="card__title"><a class="card__link" href="/product/initech-form-relay.html">Initech 表单中转站</a></h3>
+            <p class="card__summary">静态站没有后端，表单仍要能收：中转提交后 302 回原页并带上结果标记。</p>
+            <p class="card__price"><span class="price">¥3280.00</span><span class="card__stock">库存 140</span></p>
+            <p class="card__meta">
+              <time datetime="2026-03-06T10:00:00">2026-03-06</time>
+              <span class="dot" aria-hidden="true">·</span>
+              <span>2480 次浏览</span>
+            </p>
+          </div>
+        </article>
+      
+        <article class="card card--product ">
+          <a class="card__figure" href="/product/initech-search-box.html" tabindex="-1" aria-hidden="true">
+          
+            <img class="card__img" src="/uploads/demo/product-08.jpg" alt="Initech 站内搜索盒" width="320" height="200" loading="lazy" decoding="async">
+          
+          </a>
+          <div class="card__body">
+            <p class="card__eyebrow">
+              <span class="card__type">Initech</span>
+              <span class="card__region">华东</span>
+              
+            </p>
+            <h3 class="card__title"><a class="card__link" href="/product/initech-search-box.html">Initech 站内搜索盒</a></h3>
+            <p class="card__summary">把静态搜索索引托管出去：分片按固定条数切好，命中完全在浏览器里完成。</p>
+            <p class="card__price"><span class="price">¥4380.00</span><span class="card__stock">库存 96</span></p>
+            <p class="card__meta">
+              <time datetime="2026-02-25T13:30:00">2026-02-25</time>
+              <span class="dot" aria-hidden="true">·</span>
+              <span>2070 次浏览</span>
+            </p>
+          </div>
+        </article>
+      
+        <article class="card card--product ">
+          <a class="card__figure" href="/product/globex-theme-studio.html" tabindex="-1" aria-hidden="true">
+          
+            <img class="card__img" src="/uploads/demo/product-06.jpg" alt="Globex 主题工作台" width="320" height="200" loading="lazy" decoding="async">
+          
+          </a>
+          <div class="card__body">
+            <p class="card__eyebrow">
+              <span class="card__type">Globex</span>
+              <span class="card__region">华南</span>
+              
+            </p>
+            <h3 class="card__title"><a class="card__link" href="/product/globex-theme-studio.html">Globex 主题工作台</a></h3>
+            <p class="card__summary">把主题模板的编辑、预览与版本管理放在一起，改一行片段立刻看到影响面。</p>
+            <p class="card__price"><span class="price">¥9800.00</span><span class="card__stock">库存 74</span></p>
+            <p class="card__meta">
+              <time datetime="2026-02-12T15:10:00">2026-02-12</time>
+              <span class="dot" aria-hidden="true">·</span>
+              <span>2410 次浏览</span>
+            </p>
+          </div>
+        </article>
+      
+        <article class="card card--product ">
+          <a class="card__figure" href="/product/acme-cdn-edge.html" tabindex="-1" aria-hidden="true">
+          
+            <img class="card__img" src="/uploads/demo/product-03.jpg" alt="Acme 边缘加速包" width="320" height="200" loading="lazy" decoding="async">
+          
+          </a>
+          <div class="card__body">
+            <p class="card__eyebrow">
+              <span class="card__type">Acme</span>
+              <span class="card__region">华南</span>
+              
+            </p>
+            <h3 class="card__title"><a class="card__link" href="/product/acme-cdn-edge.html">Acme 边缘加速包</a></h3>
+            <p class="card__summary">给已有服务器加一层缓存：命中直接返回，未命中回源一次并落盘。</p>
+            <p class="card__price"><span class="price">¥3680.00</span><span class="card__stock">库存 220</span></p>
+            <p class="card__meta">
+              <time datetime="2026-02-06T11:40:00">2026-02-06</time>
+              <span class="dot" aria-hidden="true">·</span>
+              <span>2760 次浏览</span>
+            </p>
+          </div>
+        </article>
+      
+        <article class="card card--product ">
+          <a class="card__figure" href="/product/globex-monitor-m3.html" tabindex="-1" aria-hidden="true">
+          
+            <img class="card__img" src="/uploads/demo/product-05.jpg" alt="Globex 监控探针 M3" width="320" height="200" loading="lazy" decoding="async">
+          
+          </a>
+          <div class="card__body">
+            <p class="card__eyebrow">
+              <span class="card__type">Globex</span>
+              <span class="card__region">华东</span>
+              
+            </p>
+            <h3 class="card__title"><a class="card__link" href="/product/globex-monitor-m3.html">Globex 监控探针 M3</a></h3>
+            <p class="card__summary">每分钟回访一批关键页面，产物被误删或被覆盖时先于访客发现。</p>
+            <p class="card__price"><span class="price">¥2480.00</span><span class="card__stock">库存 310</span></p>
+            <p class="card__meta">
+              <time datetime="2026-01-23T09:50:00">2026-01-23</time>
+              <span class="dot" aria-hidden="true">·</span>
+              <span>3820 次浏览</span>
+            </p>
+          </div>
+        </article>
+      
+        <article class="card card--product ">
+          <a class="card__figure" href="/product/acme-storage-n2.html" tabindex="-1" aria-hidden="true">
+          
+            <img class="card__img" src="/uploads/demo/product-02.jpg" alt="Acme 存储节点 N2" width="320" height="200" loading="lazy" decoding="async">
+          
+          </a>
+          <div class="card__body">
+            <p class="card__eyebrow">
+              <span class="card__type">Acme</span>
+              <span class="card__region">华东</span>
+              
+            </p>
+            <h3 class="card__title"><a class="card__link" href="/product/acme-storage-n2.html">Acme 存储节点 N2</a></h3>
+            <p class="card__summary">为产物目录与媒体原图准备的存储节点，单盘热插拔，容量从 8TB 起配。</p>
+            <p class="card__price"><span class="price">¥12800.00</span><span class="card__stock">库存 46</span></p>
+            <p class="card__meta">
+              <time datetime="2026-01-14T10:20:00">2026-01-14</time>
+              <span class="dot" aria-hidden="true">·</span>
+              <span>3140 次浏览</span>
+            </p>
+          </div>
+        </article>
+      
+      </div>
+      <!-- 分页条包装：分页主体在 LIST / HOME / DETAIL（列表分页）上都存在，page.totalPages 为假时不渲染页码。
+     注意：include 的字面量参数只能被 param 字段引用读出，无法插进 pagelist 的参数里，
+     因此 items / listsize 只能写死在这里；需要第二种组合时直接写在模板里（见 book_detail.html）。 -->
+
+<nav class="pager" aria-label="分页导航">
+  <p class="pager__info">第 1 / 2 页 · 共 9 条</p>
+  <div class="pager__list">
+  
+    <a class="pager__link current" href="/product/" rel="">1</a>
+  
+    <a class="pager__link " href="/product/page-2/" rel="">2</a>
+  
+    <a class="pager__link " href="/product/page-2/" rel="next">下一页</a>
+  
+    <a class="pager__link " href="/product/page-2/" rel="">末页</a>
+  
+  </div>
+</nav>
+
+
+    </div>
+    <!-- 侧栏：热门（orderby + offset）、栏目树（channel source='category' + children）、
+     标签云（tagnav row/minCount）、年度归档（archive mode='year'）。
+     所有查询都显式给 type 与 category，因此可以放进任何页面类型（首页 / 标签页 / 归档页 / 筛选页都行）。 -->
+<aside class="aside" aria-label="站点侧栏">
+
+  <section class="widget widget--rank">
+    <h2 class="widget__title">热读周榜</h2>
+    
+    <ol class="widget__list widget__list--rank">
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/book/static-site-notes.html">静态站点笔记</a>
+        <span class="widget__stat">5587</span>
+      </li>
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/book/template-engine.html">模板引擎手记</a>
+        <span class="widget__stat">4177</span>
+      </li>
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/product/acme-gateway-x1.html">Acme 边缘网关 X1</a>
+        <span class="widget__stat">3080</span>
+      </li>
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/book/cms-practice.html">内容管理实践</a>
+        <span class="widget__stat">2713</span>
+      </li>
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/product/globex-monitor-m3.html">Globex 监控探针 M3</a>
+        <span class="widget__stat">2353</span>
+      </li>
+    
+    </ol>
+  </section>
+
+  <section class="widget widget--fresh">
+    <h2 class="widget__title">刚刚更新</h2>
+    <ul class="widget__list">
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/case/facet-pages-are-configured.html">筛选落地页是配置出来的</a>
+        <time class="widget__time" datetime="2026-03-03T09:40:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/news/tech/toc-and-body-pagination.html">正文分页与目录的配合</a>
+        <time class="widget__time" datetime="2026-02-27T16:20:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/product/initech-search-box.html">Initech 站内搜索盒</a>
+        <time class="widget__time" datetime="2026-02-25T13:30:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/news/search-index-without-tokenizer.html">没有分词器也能搜索</a>
+        <time class="widget__time" datetime="2026-02-22T13:10:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/news/tech/render-scope-and-field.html">渲染作用域与字段解析</a>
+        <time class="widget__time" datetime="2026-02-16T10:45:00">7 个月前</time>
+      </li>
+    
+    </ul>
+  </section>
+
+  <section class="widget widget--tree">
+    <h2 class="widget__title">栏目导览</h2>
+    <ul class="widget__list widget__list--tree">
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/news/">新闻<span class="widget__stat">16</span></a>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/case/">案例<span class="widget__stat">9</span></a>
+      </li>
+    
+    </ul>
+  </section>
+
+  <section class="widget widget--tags">
+    <h2 class="widget__title">热门标签</h2>
+    <div class="tagcloud">
+    
+      <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
+    
+      <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+    
+      <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+    
+      <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
+    
+      <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+    
+    </div>
+    <p class="widget__more"><a href="/tags/">全部标签 →</a></p>
+  </section>
+
+  <section class="widget widget--archive">
+    <h2 class="widget__title">年度归档</h2>
+    <ul class="archive-list">
+    
+      <li class="archive-list__item ">
+        <a class="archive-list__link" href="/archive/2026/01/">2026 年 1 月</a>
+        <span class="archive-list__count">21 篇</span>
+      </li>
+    
+      <li class="archive-list__item ">
+        <a class="archive-list__link" href="/archive/2025/01/">2025 年 1 月</a>
+        <span class="archive-list__count">25 篇</span>
+      </li>
+    
+    </ul>
+    <p class="widget__more"><a href="/archive/">按月份看 →</a></p>
+  </section>
+
+  <section class="widget widget--cta">
+    <h2 class="widget__title">本站在做什么</h2>
+    <p class="widget__text">薄荷主题是模板引擎的示例站：14 个标签、9 种页面形态、一套静态发布产物。</p>
+    <p class="widget__more"><a class="btn btn--ghost" href="/about/">关于我们</a></p>
+  </section>
+
+</aside>
+
+  </div>
+
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-col footer-col--about">
+      <p class="footer-brand">灵久演示站</p>
+      <p class="footer-desc">静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</p>
+      <p class="footer-contact">电话 <a href="tel:010-88880000">010-88880000</a></p>
+      <p class="footer-contact">邮箱 <a href="mailto:demo@lingjiuw.local">demo@lingjiuw.local</a></p>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">栏目</h2>
+      <ul class="footer-links">
+      
+        <li class="footer-links__item"><a class="footer-links__link " href="/news/">新闻<span class="footer-links__count">16</span></a></li>
+      
+        <li class="footer-links__item"><a class="footer-links__link " href="/case/">案例<span class="footer-links__count">9</span></a></li>
+      
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">内容类型</h2>
+      <div class="chip-row chip-row--footer">
+      
+        <a class="chip " href="/article/">文章</a>
+      
+        <a class="chip current" href="/product/">产品</a>
+      
+        <a class="chip " href="/book/">书籍</a>
+      
+        <a class="chip " href="/chapter/">章节</a>
+      
+        <a class="chip " href="/author/">作者</a>
+      
+        <a class="chip " href="/about/">关于我们</a>
+      
+        <a class="chip " href="/contact/">联系我们</a>
+      
+        <a class="chip " href="/single/">单页</a>
+      
+      </div>
+      <h2 class="footer-col__title">标签</h2>
+      <div class="tagcloud tagcloud--footer">
+      
+        <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
+      
+        <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+      
+        <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+      
+        <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
+      
+        <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+      
+      </div>
+    </div>
+  </div>
+  <div class="wrap site-footer__legal">
+    <p class="site-footer__copy">© 2026 灵久演示站　京ICP备2026000000号</p>
+    <p class="site-footer__ops">
+      <a href="/tags/">标签总览</a>
+      <a href="/archive/">归档</a>
+      <a href="/rank/">热读榜</a>
+      <a href="/search/">搜索</a>
+      <a href="/feed.xml">RSS</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>
+

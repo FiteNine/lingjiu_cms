@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.system.mapper.SysUserSiteMapper">
+
+    <insert id="insertBatch">
+        insert into sys_user_site (user_id, site_id) values
+        <foreach collection="siteIds" item="siteId" separator=",">
+            (#{userId}, #{siteId})
+        </foreach>
+        on conflict do nothing
+    </insert>
+
+    <delete id="deleteByUserId">
+        delete from sys_user_site where user_id = #{userId}
+    </delete>
+
+    <delete id="deleteBySiteId">
+        delete from sys_user_site where site_id = #{siteId}
+    </delete>
+
+    <select id="selectSiteIdsByUserId" resultType="java.lang.Long">
+        select site_id from sys_user_site where user_id = #{userId}
+    </select>
+
+    <select id="selectByUserIds" resultType="com.lingjiuw.cms.module.system.mapper.SysUserSiteMapper$UserSiteRow">
+        select user_id as userId, site_id as siteId
+        from sys_user_site
+        where user_id in
+        <foreach collection="userIds" item="uid" open="(" separator="," close=")">#{uid}</foreach>
+    </select>
+
+</mapper>

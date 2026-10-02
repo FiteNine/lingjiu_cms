@@ -1,0 +1,54 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <!-- 标签总览页：TAGLIST 没有分页主体，也没有 channel 作用域（§5.1 第（4）条），
+       因此这里只有 tagnav，没有 list / pagelist / 面包屑。 -->
+  <header class="page-head page-head--center">
+    <p class="page-head__eyebrow">标签总览 · tags.html</p>
+    <h1 class="page-head__title">全部标签</h1>
+    <p class="page-head__lede">每个标签都能落到一个静态页面；计数来自内容数，与列表页同口径（§6.3）。</p>
+  </header>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">标签云</h2>
+      <p class="section__note">orderby='count'，内容越多字号越大（CSS 按 data-count 加权）</p>
+    </div>
+    <div class="tagcloud tagcloud--wall">
+    {cms:tagnav type='all' row='60' minCount='1' orderby='count'}
+      <a class="tagcloud__item [field:class/]" href="[field:url/]" data-count="[field:count/]">[field:name/]<span class="tagcloud__count">[field:count/]</span></a>
+    {/cms:tagnav}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">按名称排列</h2>
+      <p class="section__note">orderby='name'，逐条列出</p>
+    </div>
+    <ul class="tag-index">
+    {cms:tagnav type='all' row='60' minCount='1' orderby='name'}
+      <li class="tag-index__item [field:class/]">
+        <a class="tag-index__link" href="[field:url/]">[field:name/]</a>
+        <span class="tag-index__slug">/[field:slug/]</span>
+        <span class="tag-index__count">[field:count/] 条</span>
+      </li>
+    {/cms:tagnav}
+    </ul>
+  </section>
+
+  <section class="section section--cta">
+    <h2 class="section__title">按时间翻</h2>
+    <p class="section__note">归档页按月聚合，见 <a href="/archive/">归档索引</a>；榜单见 <a href="/rank/">热读榜</a>。</p>
+    <ul class="archive-list archive-list--wide">
+    {cms:archive type='all' mode='month' row='12' category='all'}
+      <li class="archive-list__item [field:class/]">
+        <a class="archive-list__link" href="[field:url/]">[field:label/]</a>
+        <span class="archive-list__count">[field:count/] 篇</span>
+      </li>
+    {/cms:archive}
+    </ul>
+  </section>
+
+</div>
+{cms:include file='footer.html'/}

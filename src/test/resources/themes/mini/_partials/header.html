@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="[field:site.lang/]">
+<head>
+<meta charset="utf-8">
+<title>[field:page.title/]</title>
+<meta name="description" content="[field:site.seoDescription/]">
+<link rel="canonical" href="[field:page.canonical/]">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="[field:site.url/]">[field:site.name/]</a>
+  <nav class="main-nav">
+  {cms:channel source='menu' code='main'}
+    <a class="[field:class/]" href="[field:url/]">[field:label/]</a>
+  {/cms:channel}
+  </nav>
+</header>
+<main>

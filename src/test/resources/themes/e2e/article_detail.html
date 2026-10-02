@@ -1,0 +1,35 @@
+{cms:include file='header.html'/}
+<nav class="breadcrumb">
+{cms:breadcrumb withContent='1'}
+  <a class="[field:class/]" href="[field:url/]">[field:name/]</a>
+{/cms:breadcrumb}
+</nav>
+<article class="detail">
+{cms:detail}
+  <h1 class="title">[field:title/]</h1>
+  <p class="meta">
+    <time>[field:publishTime format='Y-m-d'/]</time>
+    <span class="views">[field:viewCount/]</span>
+    <span class="category">[field:categoryName/]</span>
+  </p>
+  <div class="content">[field:content/]</div>
+  <p class="tags">
+  {cms:foreach field='tags'}
+    <a class="tag" href="[field:url/]">[field:name/]</a>
+  {/cms:foreach}
+  </p>
+{/cms:detail}
+</article>
+<nav class="prenext">
+{cms:prenext type='both'}
+  <a class="[field:type/]" href="[field:url/]">[field:title/]</a>
+{/cms:prenext}
+</nav>
+<aside class="related">
+  <h2>相关阅读</h2>
+  {cms:query type='article' category='all' relate='tag' exclude='self' row='3' name='related'}
+    <a href="[field:url/]">[field:title/]</a>
+  {/cms:query}
+  {cms:if field='query.related.empty'}<p class="empty">没有相关文章</p>{/cms:if}
+</aside>
+{cms:include file='footer.html'/}

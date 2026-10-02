@@ -1,0 +1,39 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <!-- 榜单页是站点声明的列表页（§7.2.1 第 11 行）：pages.static 里 rank 带 query，
+       因此这一页必须恰有一个 list 标签，也只有这里能放 pagelist 标签。 -->
+  <header class="page-head">
+    <p class="page-head__eyebrow">榜单 · rank.html（站点声明的列表页）</p>
+    <h1 class="page-head__title">热读榜</h1>
+    <p class="page-head__meta">最近 7 天阅读量倒序 · 每页 10 条 · URL /rank/page-{n}/</p>
+  </header>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      {cms:if field='page.empty'}<p class="notice notice--empty">还没有阅读数据</p>{/cms:if}
+      <ol class="rank-list rank-list--big">
+      {cms:list type='article' category='all' row='10' orderby='viewCountWeek desc'}
+        <li class="rank-list__item [field:class/]">
+          <span class="rank-list__no" aria-hidden="true"></span>
+          <div class="rank-list__body">
+            <a class="rank-list__title" href="[field:url/]">[field:title/]</a>
+            <p class="rank-list__meta">
+              <span>[field:typeName/]</span>
+              <span class="dot" aria-hidden="true">·</span>
+              <time datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+              <span class="dot" aria-hidden="true">·</span>
+              <span>累计 [field:viewCount format='compact'/]</span>
+            </p>
+          </div>
+          <span class="rank-list__stat">[field:viewCountWeek format='compact'/]</span>
+        </li>
+      {/cms:list}
+      </ol>
+      {cms:include file='pager.html'/}
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

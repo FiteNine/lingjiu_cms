@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsContentTypeMapper">
+
+    <!--
+      按站点播种内置类型（static-publish.md §2.1）。
+      值由 Java 侧 SiteBootstrapService 的常量表传入，与迁移
+      V20261002090011__cms_site_seed.sql 里的字面量必须一致；
+      已存在同 code 的（未删）类型则跳过，所以可以重复调用。
+    -->
+    <insert id="seedBuiltinTypes">
+        insert into cms_content_type (site_id, code, name, kind, hierarchical,
+                                      detail_url_pattern, list_url_pattern, per_page, status, sort)
+        select #{siteId}, v.code, v.name, v.kind, v.hierarchical,
+               v.detail_url_pattern, v.list_url_pattern, v.per_page, 1, v.sort
+          from (values
+        <foreach collection="types" item="t" separator=",">
+            (#{t.code,jdbcType=VARCHAR}::varchar,
+             #{t.name,jdbcType=VARCHAR}::varchar,
+             #{t.kind,jdbcType=VARCHAR}::varchar,
+             #{t.hierarchical,jdbcType=SMALLINT}::smallint,
+             #{t.detailUrlPattern,jdbcType=VARCHAR}::varchar,
+             #{t.listUrlPattern,jdbcType=VARCHAR}::varchar,
+             #{t.perPage,jdbcType=INTEGER}::int,
+             #{t.sort,jdbcType=INTEGER}::int)
+        </foreach>
+          ) as v(code, name, kind, hierarchical, detail_url_pattern, list_url_pattern, per_page, sort)
+         where not exists (select 1 from cms_content_type x
+                            where x.site_id = #{siteId} and x.code = v.code and x.deleted = 0)
+    </insert>
+
+    <!--
+      新增内容类型（后台「内容类型」页）。
+      为什么不用 BaseMapper.insert：options 是 jsonb 列，PostgreSQL 不接受 varchar 到 jsonb 的隐式
+      赋值，实体上它标了 insertStrategy/updateStrategy = NEVER，只能在这里显式 ::jsonb。
+      create_time/update_time 直接用 now()：审计列即使没被 MetaObjectHandler 填上也必须是有效时间
+      （列是 not null，只有不给值时才轮到 default，写明 now() 更稳）。
+    -->
+    <insert id="insertType" parameterType="com.lingjiuw.cms.module.cms.entity.CmsContentType"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into cms_content_type (site_id, code, name, kind, hierarchical,
+                                      detail_url_pattern, list_url_pattern, detail_template, list_template,
+                                      paginate_body, sort_field, sort_order, per_page,
+                                      seo_title_field, seo_desc_field, options, status, sort,
+                                      create_by, create_time, update_by, update_time, deleted)
+        values (#{siteId}, #{code}, #{name}, #{kind}, #{hierarchical},
+                #{detailUrlPattern}, #{listUrlPattern}, #{detailTemplate}, #{listTemplate},
+                #{paginateBody}, #{sortField}, #{sortOrder}, #{perPage},
+                #{seoTitleField}, #{seoDescField}, #{options}::jsonb, #{status}, #{sort},
+                #{createBy}, now(), #{updateBy}, now(), 0)
+    </insert>
+
+    <!--
+      修改内容类型：options 的写法同上。code 与 site_id 是"字段 / 内容按它关联"的不可变标识，
+      改一处要连带改三张表，所以不在 set 列表里（Service 会先拒绝改 code）。
+      XML 里的语句不会自动带逻辑删除条件（backend/AGENTS.md），deleted = 0 自己写。
+    -->
+    <update id="updateType" parameterType="com.lingjiuw.cms.module.cms.entity.CmsContentType">
+        update cms_content_type
+           set name = #{name},
+               kind = #{kind},
+               hierarchical = #{hierarchical},
+               detail_url_pattern = #{detailUrlPattern},
+               list_url_pattern = #{listUrlPattern},
+               detail_template = #{detailTemplate},
+               list_template = #{listTemplate},
+               paginate_body = #{paginateBody},
+               sort_field = #{sortField},
+               sort_order = #{sortOrder},
+               per_page = #{perPage},
+               seo_title_field = #{seoTitleField},
+               seo_desc_field = #{seoDescField},
+               options = #{options}::jsonb,
+               status = #{status},
+               sort = #{sort},
+               update_by = #{updateBy},
+               update_time = now()
+         where id = #{id} and site_id = #{siteId} and deleted = 0
+    </update>
+
+</mapper>

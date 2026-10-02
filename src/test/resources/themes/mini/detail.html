@@ -1,0 +1,22 @@
+{cms:include file='header.html'/}
+<nav class="breadcrumb">
+{cms:breadcrumb withContent='1'}
+  <a class="[field:class/]" href="[field:url/]">[field:name/]</a>
+{/cms:breadcrumb}
+</nav>
+<article class="detail">
+{cms:detail}
+  <h1 class="title">[field:title/]</h1>
+  <p class="meta">
+    <time>[field:publishTime format='Y-m-d'/]</time>
+    <span class="views">[field:viewCount/]</span>
+  </p>
+  <div class="content">[field:content/]</div>
+{/cms:detail}
+</article>
+<nav class="prenext">
+{cms:prenext type='both'}
+  <a class="[field:type/]" href="[field:url/]">[field:title/]</a>
+{/cms:prenext}
+</nav>
+{cms:include file='footer.html'/}

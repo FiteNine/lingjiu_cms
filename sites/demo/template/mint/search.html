@@ -1,0 +1,41 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <!-- SEARCH 页没有浏览位置：不能有 channel / breadcrumb / list / pagelist（§6.7）。
+       它是 H 类页面：静态壳 + /search/index.json 前端匹配，data-cms-search 是 §7.5 的挂载点。 -->
+  <header class="page-head page-head--center">
+    <p class="page-head__eyebrow">搜索 · search.html</p>
+    <h1 class="page-head__title">站内搜索</h1>
+    <p class="page-head__lede">静态页不带数据库：输入关键词后由 site.js 读取 /search/index.json 在本地匹配，无脚本时请走下方入口。</p>
+  </header>
+
+  <form class="search-form" action="/search/" method="get" role="search" data-cms-search>
+    <label class="sr-only" for="q">搜索关键词</label>
+    <input class="search-form__input" id="q" type="search" name="q" value="[field:param.q/]" placeholder="试试：模板、发布、Java" autocomplete="off">
+    <button class="search-form__btn btn btn--primary" type="submit">搜索</button>
+  </form>
+
+  {cms:if field='param.q'}
+  <p class="search-result__tip" data-cms-search-tip>正在搜索“[field:param.q/]”…（结果容器在下方，脚本未执行时这里只有提示）</p>
+  {cms:else/}
+  <p class="search-result__tip" data-cms-search-tip>输入关键词开始搜索，例如“薄荷主题”。</p>
+  {/cms:if}
+
+  {cms:if field='param.page'}<p class="muted">第 [field:param.page/] 页结果</p>{/cms:if}
+
+  <div class="search-result" data-cms-search-result aria-live="polite">
+    <p class="state-empty">这里会列出匹配结果。</p>
+  </div>
+
+  <section class="section section--cta">
+    <h2 class="section__title">没有脚本也能找内容</h2>
+    <p class="section__note"><a href="/tags/">全部标签</a> · <a href="/archive/">年月归档</a> · <a href="/rank/">热读榜</a> · <a href="/news/">新闻</a></p>
+    <div class="chip-row">
+    {cms:tagnav type='all' row='12' minCount='1' orderby='count'}
+      <a class="chip [field:class/]" href="[field:url/]">[field:name/]<span class="chip__count">[field:count/]</span></a>
+    {/cms:tagnav}
+    </div>
+  </section>
+
+</div>
+{cms:include file='footer.html'/}

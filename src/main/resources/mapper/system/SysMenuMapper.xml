@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.system.mapper.SysMenuMapper">
+
+    <select id="selectPermsByUserId" resultType="java.lang.String">
+        select distinct m.perms from sys_menu m
+        join sys_role_menu rm on rm.menu_id = m.id
+        join sys_user_role ur on ur.role_id = rm.role_id
+        join sys_role r on r.id = ur.role_id and r.deleted = 0 and r.status = 1
+        where ur.user_id = #{userId}
+          and m.deleted = 0 and m.status = 1
+          and m.perms is not null and m.perms &lt;&gt; ''
+    </select>
+
+</mapper>

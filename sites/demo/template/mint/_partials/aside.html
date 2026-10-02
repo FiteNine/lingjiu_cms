@@ -1,0 +1,72 @@
+<!-- 侧栏：热门（orderby + offset）、栏目树（channel source='category' + children）、
+     标签云（tagnav row/minCount）、年度归档（archive mode='year'）。
+     所有查询都显式给 type 与 category，因此可以放进任何页面类型（首页 / 标签页 / 归档页 / 筛选页都行）。 -->
+<aside class="aside" aria-label="站点侧栏">
+
+  <section class="widget widget--rank">
+    <h2 class="widget__title">热读周榜</h2>
+    {cms:if field='query.asideHot.empty'}<p class="widget__empty">本周还没有阅读数据</p>{/cms:if}
+    <ol class="widget__list widget__list--rank">
+    {cms:query type='all' category='all' row='5' orderby='viewCountWeek desc' name='asideHot'}
+      <li class="widget__item [field:class/]">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="[field:url/]">[field:title/]</a>
+        <span class="widget__stat">[field:viewCountWeek format='compact'/]</span>
+      </li>
+    {/cms:query}
+    </ol>
+  </section>
+
+  <section class="widget widget--fresh">
+    <h2 class="widget__title">刚刚更新</h2>
+    <ul class="widget__list">
+    {cms:query type='all' category='all' row='5' offset='5' orderby='publishTime desc' name='asideFresh'}
+      <li class="widget__item [field:class/]">
+        <a class="widget__link" href="[field:url/]">[field:title/]</a>
+        <time class="widget__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='relative'/]</time>
+      </li>
+    {/cms:query}
+    </ul>
+  </section>
+
+  <section class="widget widget--tree">
+    <h2 class="widget__title">栏目导览</h2>
+    <ul class="widget__list widget__list--tree">
+    {cms:channel source='category' depth='1' countScope='tree'}
+      <li class="widget__item [field:class/]">
+        <a class="widget__link" href="[field:url/]">[field:label/]<span class="widget__stat">[field:count/]</span></a>
+      </li>
+    {/cms:channel}
+    </ul>
+  </section>
+
+  <section class="widget widget--tags">
+    <h2 class="widget__title">热门标签</h2>
+    <div class="tagcloud">
+    {cms:tagnav type='all' row='10' minCount='1' orderby='count'}
+      <a class="tagcloud__item [field:class/]" href="[field:url/]">[field:name/]<span class="tagcloud__count">[field:count/]</span></a>
+    {/cms:tagnav}
+    </div>
+    <p class="widget__more"><a href="/tags/">全部标签 →</a></p>
+  </section>
+
+  <section class="widget widget--archive">
+    <h2 class="widget__title">年度归档</h2>
+    <ul class="archive-list">
+    {cms:archive type='all' mode='year' row='6' category='all'}
+      <li class="archive-list__item [field:class/]">
+        <a class="archive-list__link" href="[field:url/]">[field:label/]</a>
+        <span class="archive-list__count">[field:count/] 篇</span>
+      </li>
+    {/cms:archive}
+    </ul>
+    <p class="widget__more"><a href="/archive/">按月份看 →</a></p>
+  </section>
+
+  <section class="widget widget--cta">
+    <h2 class="widget__title">本站在做什么</h2>
+    <p class="widget__text">薄荷主题是模板引擎的示例站：14 个标签、9 种页面形态、一套静态发布产物。</p>
+    <p class="widget__more"><a class="btn btn--ghost" href="/about/">关于我们</a></p>
+  </section>
+
+</aside>

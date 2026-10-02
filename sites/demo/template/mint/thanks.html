@@ -1,0 +1,36 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <!-- 感谢页：站点选项 pages.static 里的 thanks 条目，没有 query，因此不能有 list / pagelist（§6.7 ※1）。
+       表单成功跳到这里，param.form_ok 是 §7.2.3 注入的四个 key 之一。 -->
+  <section class="thanks">
+    <p class="thanks__seal" aria-hidden="true">✓</p>
+    <h1 class="thanks__title">提交成功</h1>
+    <p class="thanks__lede">我们收到了你的信息，工作日 24 小时内会有同事联系你。</p>
+    {cms:if field='param.form_ok'}<p class="notice notice--ok" role="status">回执编号：[field:param.form_ok/]</p>{/cms:if}
+    <p class="thanks__ops">
+      <a class="btn btn--primary" href="/">回到首页</a>
+      <a class="btn btn--ghost" href="/product/">继续看产品</a>
+      <a class="btn btn--ghost" href="/news/">看新闻</a>
+    </p>
+    <p class="thanks__contact muted">着急的话直接打 [field:site.contactPhone/]，或发 [field:site.contactEmail/]。</p>
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">等回复的时候看看这些</h2>
+      <p class="section__note">query type='all' row='6'</p>
+    </div>
+    <ol class="feed-list">
+    {cms:query type='all' category='all' row='6' orderby='publishTime desc'}
+      <li class="feed-list__item [field:class/]">
+        <time class="feed-list__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+        <a class="feed-list__link" href="[field:url/]">[field:title/]</a>
+        <span class="feed-list__type">[field:typeName/]</span>
+      </li>
+    {/cms:query}
+    </ol>
+  </section>
+
+</div>
+{cms:include file='footer.html'/}

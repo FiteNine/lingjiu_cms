@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsContentIndexMapper">
+
+    <!--
+      字段索引表（static-publish.md §2.5）的写入侧。口径与 DbContentProvider 的读取侧逐条对应：
+        * value_key：标量字段恒为 'default'，多值字段（ENUM_MULTI / TAGS / RELATION / IMAGES /
+          FILES / JSON）每个取值一行；
+        * value_type：写 cms_field.field_type 的类型名（TEXT / ENUM / DECIMAL / INT / BOOL / TAGS…）；
+        * 值落点按字段类型分：num_value（INT / DECIMAL / BOOL / RELATION）、time_value（DATE /
+          DATETIME）、str_value（其余）。顺序与生成这些行的 ContentService.buildIndexRows 一致。
+      这些行只被 where / orderby / facet / relate='field:<code>' 读，漏一行就等于"这个取值筛不到内容"。
+    -->
+
+    <!-- 保存内容时整批重建（先删旧行再插新行，同一事务内）。
+         逻辑删除列显式给 0：XML 语句不自动带逻辑删除条件（backend/AGENTS.md），
+         靠建表默认值也能跑，但默认值哪天变了语义就静默变味。 -->
+    <insert id="insertBatch">
+        insert into cms_content_index (site_id, content_id, type_code, field_code, value_key, value_type,
+                                       num_value, str_value, time_value, deleted)
+        values
+        <foreach collection="rows" item="r" separator=",">
+            (#{r.siteId}, #{r.contentId}, #{r.typeCode}, #{r.fieldCode}, #{r.valueKey}, #{r.valueType},
+             #{r.numValue,jdbcType=NUMERIC}, #{r.strValue,jdbcType=VARCHAR}, #{r.timeValue,jdbcType=TIMESTAMP}, 0)
+        </foreach>
+    </insert>
+
+</mapper>

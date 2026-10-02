@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">凌久 CMS 标志：界面蓝印章中的"久"字，捺画延伸为一段运行信号</title>
+
+  <!-- 印章：后台主色 #409EFF（Element Plus primary），圆角取全站工程感的 1/8 -->
+  <rect width="64" height="64" rx="8" fill="#409EFF"/>
+
+  <!-- "久"字三画：撇 / 横撇 / 捺（几何化笔画，圆头圆接，白） -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 撇：自右上起，向左下落下，与横撇之间留出字隙 -->
+    <path d="M32 14.5 C29.5 19.8 27 22.9 24 25.5"/>
+    <!-- 横撇：横画微向上抗肩，折后向左下撇出，收笔略高 -->
+    <path d="M16.5 33.4 L37 30.6 Q40.4 30 38.8 34.2 C36.2 40.8 31.4 45.8 25.2 49.4"/>
+    <!-- 捺：自横画中段起，与撇交叉后向右下展开，收在最低处 -->
+    <path d="M28 32.8 C30.9 39.6 35.5 45.5 42 49.6"/>
+  </g>
+
+  <!-- 记忆点：捺画不收笔，变细延伸为一段方波运行信号 -->
+  <path d="M41.5 49.6 H44.6 V46.5 H47.4 V49.6 H49.6"
+        fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linejoin="miter"/>
+
+  <!-- 信号末端的状态点：仍在运行，一切正常 -->
+  <circle cx="52.4" cy="49.6" r="2.1" fill="#FFFFFF"/>
+</svg>

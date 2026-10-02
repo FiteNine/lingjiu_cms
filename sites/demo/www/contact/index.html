@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>联系我们 · 灵久演示站</title>
+<meta name="description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
+<meta name="keywords" content="静态站点,内容管理,Java,模板引擎">
+<meta name="theme-color" content="#0f7a68">
+<link rel="canonical" href="https://demo.lingjiuw.local/contact/">
+
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="灵久演示站">
+<meta property="og:title" content="联系我们">
+<meta property="og:url" content="https://demo.lingjiuw.local/contact/">
+<meta property="og:image" content="">
+<meta property="og:description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
+<link rel="alternate" type="application/rss+xml" title="灵久演示站 订阅" href="/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+</head>
+<body class="page">
+<a class="skip-link" href="#main">跳到主内容</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true">灵</span>
+      <span class="brand__text">
+        <span class="brand__name">灵久演示站</span>
+        <span class="brand__tag">静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</span>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+      <span class="sr-only">展开导航</span>
+    </button>
+    <nav class="main-nav" id="main-nav" aria-label="主导航">
+      <ul class="main-nav__list">
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/" aria-current="">首页</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/news/" aria-current="">新闻</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/product/" aria-current="">产品</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/book/" aria-current="">书籍</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/author/" aria-current="">作者</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/about/" aria-current="">关于</a>
+          
+        </li>
+      
+        <li class="main-nav__item active">
+          <a class="main-nav__link" href="/contact/" aria-current="page">联系</a>
+          
+        </li>
+      
+      </ul>
+      <form class="nav-search" action="/search/" method="get" role="search" data-cms-search>
+        <label class="sr-only" for="nav-q">站内搜索</label>
+        <input class="nav-search__input" id="nav-q" type="search" name="q" placeholder="搜索…" autocomplete="off">
+        <button class="nav-search__btn" type="submit">搜索</button>
+      </form>
+    </nav>
+  </div>
+</header>
+<main class="site-main" id="main">
+
+<div class="wrap stack">
+
+  <header class="page-head">
+    <p class="page-head__eyebrow">联系我们 · contact.html（SINGLE 类型 contact）</p>
+    <h1 class="page-head__title">联系我们</h1>
+    <p class="page-head__meta">电话 <a href="tel:010-88880000">010-88880000</a> · 邮箱 <a href="mailto:demo@lingjiuw.local">demo@lingjiuw.local</a></p>
+  </header>
+
+  <!-- 提交结果横幅写在 thanks.html（STATIC 页，页面计划会给它注入 param.form_ok / param.form_error，
+       §7.2.3）。本页是 SINGLE，计划期目前不注入 param，因此这里不读 param.* ——
+       否则渲染期会以"具名作用域 param 不存在"（E1004）停在这一页。 -->
+  <div class="layout layout--form">
+    <div class="layout__main">
+      
+      <section class="contact-form-block">
+        <h2 class="block-title">询价 / 留言</h2>
+        <p class="muted">带 <span class="form__req">*</span> 的是必填项。产品页上的询价会自动带上产品编号。</p>
+
+        <!-- 引擎的表单标签（表单 code = inquiry）等 cms_form 表落地后启用：§9.5 属于后续阶段，
+             当前种子迁移里还没有这张表，写上它会让本页以 E2008 发布失败。
+             下面这段 HTML 与它的产出契约一致——method=post、蜜罐 _hp、站点隐藏域 data-cms-site、
+             每个字段一个 label + 控件、提交按钮；提交、限流与审核由后续的动态层接管。 -->
+        <form class="form" method="post" action="/contact/" data-cms-form="inquiry">
+          <div class="form__field">
+            <label for="name">姓名 <span class="form__req">*</span></label>
+            <input type="text" id="name" name="name" placeholder="怎么称呼你" required>
+          </div>
+          <div class="form__field">
+            <label for="phone">电话 <span class="form__req">*</span></label>
+            <input type="tel" id="phone" name="phone" placeholder="手机或座机" required>
+          </div>
+          <div class="form__field">
+            <label for="email">邮箱</label>
+            <input type="email" id="email" name="email" placeholder="选填">
+          </div>
+          <div class="form__field">
+            <label for="message">留言</label>
+            <textarea id="message" name="message" rows="5" placeholder="想问什么"></textarea>
+          </div>
+          <div style="position:absolute;left:-9999px" aria-hidden="true">
+            <input type="text" name="_hp" tabindex="-1" autocomplete="off">
+          </div>
+          <input type="hidden" name="contentId" value="46">
+          <input type="hidden" name="contentType" value="contact">
+          <input type="hidden" name="contentUrl" value="/contact/">
+          <input type="hidden" name="siteId" value="2" data-cms-site="2">
+          <button type="submit">提交询价</button>
+        </form>
+      </section>
+
+      <section class="contact-content">
+        <h2 class="block-title">拜访地址</h2>
+        <div class="content"><p>商务合作、技术支持与内容投稿都走同一个邮箱，工作日一天内回复。</p><h2>联系方式</h2><ul><li>邮箱：demo@lingjiuw.local</li><li>电话：010-88880000（工作日 9:30–18:30）</li><li>地址：北京市朝阳区示范围 88 号 3 号楼 5 层</li></ul><h2>到访</h2><p>来访请提前一天邮件预约，前台需要登记。</p></div>
+      </section>
+      
+    </div>
+
+    <aside class="aside aside--narrow" aria-label="联系方式">
+      <section class="widget">
+        <h2 class="widget__title">直接联系</h2>
+        <ul class="widget__list">
+          <li class="widget__item"><span class="widget__label">电话</span><a class="widget__link" href="tel:010-88880000">010-88880000</a></li>
+          <li class="widget__item"><span class="widget__label">邮箱</span><a class="widget__link" href="mailto:demo@lingjiuw.local">demo@lingjiuw.local</a></li>
+          <li class="widget__item"><span class="widget__label">备案</span><span>京ICP备2026000000号</span></li>
+        </ul>
+      </section>
+      <section class="widget">
+        <h2 class="widget__title">热门标签</h2>
+        <div class="tagcloud">
+        
+          <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
+        
+          <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+        
+          <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+        
+          <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
+        
+          <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+        
+        </div>
+      </section>
+    </aside>
+  </div>
+
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-col footer-col--about">
+      <p class="footer-brand">灵久演示站</p>
+      <p class="footer-desc">静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</p>
+      <p class="footer-contact">电话 <a href="tel:010-88880000">010-88880000</a></p>
+      <p class="footer-contact">邮箱 <a href="mailto:demo@lingjiuw.local">demo@lingjiuw.local</a></p>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">栏目</h2>
+      <ul class="footer-links">
+      
+        <li class="footer-links__item"><a class="footer-links__link " href="/news/">新闻<span class="footer-links__count">16</span></a></li>
+      
+        <li class="footer-links__item"><a class="footer-links__link " href="/case/">案例<span class="footer-links__count">9</span></a></li>
+      
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">内容类型</h2>
+      <div class="chip-row chip-row--footer">
+      
+        <a class="chip " href="/article/">文章</a>
+      
+        <a class="chip " href="/product/">产品</a>
+      
+        <a class="chip " href="/book/">书籍</a>
+      
+        <a class="chip " href="/chapter/">章节</a>
+      
+        <a class="chip " href="/author/">作者</a>
+      
+        <a class="chip " href="/about/">关于我们</a>
+      
+        <a class="chip current" href="/contact/">联系我们</a>
+      
+        <a class="chip " href="/single/">单页</a>
+      
+      </div>
+      <h2 class="footer-col__title">标签</h2>
+      <div class="tagcloud tagcloud--footer">
+      
+        <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
+      
+        <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+      
+        <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+      
+        <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
+      
+        <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+      
+      </div>
+    </div>
+  </div>
+  <div class="wrap site-footer__legal">
+    <p class="site-footer__copy">© 2026 灵久演示站　京ICP备2026000000号</p>
+    <p class="site-footer__ops">
+      <a href="/tags/">标签总览</a>
+      <a href="/archive/">归档</a>
+      <a href="/rank/">热读榜</a>
+      <a href="/search/">搜索</a>
+      <a href="/feed.xml">RSS</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>
+

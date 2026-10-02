@@ -1,0 +1,12 @@
+target/
+uploads/
+logs/
+*.iml
+.idea/
+.vscode/
+
+# 前端
+admin-ui/node_modules/
+admin-ui/dist/
+# 前端构建产物（npm run build 输出到 Spring Boot 静态资源目录）
+src/main/resources/static/

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsTagMapper">
+
+    <!-- 各标签关联的未删除内容数（后台标签列表的口径：草稿也算，与发布引擎的
+         CmsContentTagMapper.selectTagCounts 的时间窗口径不同） -->
+    <select id="selectContentCounts" resultType="com.lingjiuw.cms.module.cms.dto.TagContentCount">
+        select ct.tag_id as tagId, count(distinct c.id) as count
+          from cms_content_tag ct
+          join cms_content c on c.id = ct.content_id and c.deleted = 0
+         where ct.deleted = 0
+         group by ct.tag_id
+    </select>
+
+</mapper>

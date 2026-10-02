@@ -1,0 +1,59 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <!-- 归档页：年月读 page.year / page.month（页面计划填），显示名与计数读 channel.label / channel.count。 -->
+  <header class="page-head">
+    <p class="page-head__eyebrow">年月归档页 · archive_list.html</p>
+    <h1 class="page-head__title">[field:channel.label/]</h1>
+    <p class="page-head__meta">
+      <time datetime="[field:page.year/]">[field:page.year/]</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span>该月共 [field:channel.count/] 条</span>
+    </p>
+  </header>
+
+  <section class="section section--archive-strip">
+    <div class="section__head">
+      <h2 class="section__title">按月归档</h2>
+      <p class="section__note">archive type='all' mode='month'</p>
+    </div>
+    <ul class="archive-list archive-list--wide">
+    {cms:archive type='all' mode='month' row='18' category='all'}
+      <li class="archive-list__item [field:class/]">
+        <a class="archive-list__link" href="[field:url/]">[field:label/]</a>
+        <span class="archive-list__count">[field:count/] 篇</span>
+      </li>
+    {/cms:archive}
+    </ul>
+  </section>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      {cms:if field='page.empty'}<p class="notice notice--empty">这个月还没有内容</p>{/cms:if}
+      <ol class="feed-list feed-list--archive">
+      {cms:list type='all' category='all' row='10' orderby='publishTime desc'}
+        <li class="feed-list__item [field:class/]">
+          <time class="feed-list__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='m-d'/]</time>
+          <a class="feed-list__link" href="[field:url/]">[field:title/]</a>
+          <span class="feed-list__type">[field:typeName/]</span>
+          <span class="feed-list__stat">[field:viewCount format='compact'/]</span>
+        </li>
+      {/cms:list}
+      </ol>
+      {cms:include file='pager.html'/}
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

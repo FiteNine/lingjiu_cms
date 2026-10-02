@@ -1,0 +1,10 @@
+{cms:include file='header.html'/}
+<h1 class="channel-title">标签：[field:channel.label/]</h1>
+<ul class="news">
+{cms:list type='all' category='all' tag='java' row='8'}
+  <li class="card [field:class/]">
+    <a href="[field:url/]">[field:title/]</a>
+  </li>
+{/cms:list}
+</ul>
+{cms:include file='footer.html'/}

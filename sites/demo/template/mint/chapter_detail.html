@@ -1,0 +1,86 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb withContent='1'}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+
+      <!-- 父链派生字段：章节页写出"《书名》目录"靠的是 parentTitle / parentUrl（§3.7 裁定三）。
+           本页的 detail 标签走正文分页（chapter.paginate_body='content'），
+           因此整份模板里不能有 list 标签，也不能有页号条（E3001 / E3003）。
+           原样的标签起始序列请用反斜杠转义（§3.4）：\{cms:list} 输出为纯文本。 -->
+      <header class="chapter-head">
+        <p class="chapter-head__up"><a href="[field:parentUrl/]">《[field:parentTitle/]》目录</a></p>
+        <h1 class="chapter-head__title">[field:title/]</h1>
+        <p class="chapter-head__meta">
+          <span class="chapter-head__volume">[field:volume/]</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>[field:wordCount/] 字</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <time datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+        </p>
+      </header>
+
+      <!-- ancestors：父链（书 → 卷）的迭代，用作"路径"提示 -->
+      {cms:if field='ancestors'}
+      <nav class="path-line" aria-label="所属路径">
+      {cms:foreach field='ancestors'}
+        <a class="path-line__link" href="[field:url/]">[field:title/]</a>
+        <span class="path-line__sep" aria-hidden="true">›</span>
+      {/cms:foreach}
+      </nav>
+      {/cms:if}
+
+      <article class="chapter content">
+      {cms:detail}
+        <div class="chapter__body">[field:content/]</div>
+        <p class="chapter__pageinfo">第 [field:pageNo/] / [field:totalPages/] 页</p>
+
+        <!-- 同书上下章：within='parent' 只在同一本书内相邻（§6.4） -->
+        <nav class="prenext" aria-label="同书上下章">
+          {cms:prenext type='both' within='parent'}
+            <a class="prenext__link prenext__link--[field:type/]" data-dir="[field:type/]" rel="[field:type/]" href="[field:url/]"><span class="prenext__dir"></span><span class="prenext__title">[field:title/]</span></a>
+          {/cms:prenext}
+          {cms:if field='hasPrev'}{cms:else/}<p class="prenext__hint">已经是第一章</p>{/cms:if}
+          {cms:if field='hasNext'}{cms:else/}<p class="prenext__hint">已经是最后一章</p>{/cms:if}
+        </nav>
+      {/cms:detail}
+      </article>
+
+      <!-- 正文分页：只用上一页 / 下一页 / 返回目录（§5.6：正文分页不提供页号窗口，用 pagelist 会 E3003） -->
+      <nav class="content-pager" aria-label="正文分页">
+        {cms:if field='page.hasPrev'}<a class="btn btn--ghost" href="[field:page.prevUrl/]" rel="prev">上一页</a>{cms:else/}<span class="btn btn--disabled">已是第 1 页</span>{/cms:if}
+        <a class="btn btn--ghost" href="[field:parentUrl/]">目录（第 [field:page.pageNo/] / [field:page.totalPages/] 页）</a>
+        {cms:if field='page.hasNext'}<a class="btn btn--ghost" href="[field:page.nextUrl/]" rel="next">下一页</a>{cms:else/}<span class="btn btn--disabled">已是最后一页</span>{/cms:if}
+      </nav>
+
+      <!-- 本章目录：of='parent'（锚定项 = 这一章，取它父内容的子项），不分页 -->
+      <section class="section section--catalog">
+        <div class="section__head">
+          <h2 class="section__title">目录</h2>
+          <p class="section__note">query type='chapter' of='parent' row='200' orderby='sort asc'</p>
+        </div>
+        <ol class="catalog">
+        {cms:query type='chapter' category='all' of='parent' row='200' orderby='sort asc'}
+          <li class="catalog__item [field:class/]">
+            <a class="catalog__link" href="[field:url/]"><span class="catalog__no">[field:sort/]</span>[field:title/]</a>
+          </li>
+        {/cms:query}
+        </ol>
+      </section>
+
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

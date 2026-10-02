@@ -1,0 +1,48 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <!-- 标签详情页。本页的 channel 就是该标签（§5.1 第（4）条），列表的标签条件由页面计划注入：
+       参数值一律是字面量（§3.3），所以模板里写不出 tag='当前标签'，也不需要写。 -->
+  <header class="page-head">
+    <p class="page-head__eyebrow">标签页 · tag_list.html</p>
+    <h1 class="page-head__title">#[field:channel.label/]</h1>
+    <p class="page-head__meta">该标签下共 [field:channel.count/] 条内容 · 每页 8 条</p>
+  </header>
+
+  <section class="section section--chips">
+    <div class="section__head">
+      <h2 class="section__title">相邻标签</h2>
+      <p class="section__note">tagnav type='all' orderby='count'</p>
+    </div>
+    <div class="chip-row">
+    {cms:tagnav type='all' row='12' minCount='1' orderby='count'}
+      <a class="chip [field:class/]" href="[field:url/]">[field:name/]<span class="chip__count">[field:count/]</span></a>
+    {/cms:tagnav}
+    </div>
+  </section>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      {cms:if field='page.empty'}<p class="notice notice--empty">这个标签下还没有内容</p>{/cms:if}
+      <div class="card-grid card-grid--2">
+      {cms:list type='all' category='all' row='8' orderby='publishTime desc'}
+        {cms:include file='card.html' size='big'/}
+      {/cms:list}
+      </div>
+      {cms:include file='pager.html'/}
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

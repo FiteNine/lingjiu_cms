@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- feed 模板：只有 site 作用域 + 一个顶层 query（§7.3 第（4）条、§6.7 的 ※3） -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>[field:site.name/]</title>
+    <link>[field:site.url/]</link>
+    <description>[field:site.seoDescription/]</description>
+    <language>[field:site.lang/]</language>
+    <copyright>[field:site.name/] [field:site.year/]</copyright>
+    <atom:link href="[field:site.url/]/feed.xml" rel="self" type="application/rss+xml"/>
+    {cms:query type='article' category='all' row='20' orderby='publishTime desc'}
+    <item>
+      <title>[field:title/]</title>
+      <link>[field:canonical/]</link>
+      <guid isPermaLink="true">[field:canonical/]</guid>
+      <pubDate>[field:publishTime format='iso'/]</pubDate>
+      <category>[field:categoryName/]</category>
+      <description>[field:summary maxlen='150'/]</description>
+      {cms:if field='download'}<enclosure url="[field:download/]" type="application/octet-stream"/>{/cms:if}
+    </item>
+    {/cms:query}
+  </channel>
+</rss>

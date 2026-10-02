@@ -1,0 +1,60 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <!-- from='channel'：起点从当前栏目开始（§6.4）；分类索引页的 channel 就是该分类 -->
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb from='channel'}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <header class="page-head">
+    <p class="page-head__eyebrow">分类索引页</p>
+    <h1 class="page-head__title">[field:channel.label/]</h1>
+    <p class="page-head__meta">本站栏目共 [field:channel.count/] 条内容</p>
+  </header>
+
+  <section class="section section--tree">
+    <div class="section__head">
+      <h2 class="section__title">栏目索引</h2>
+      <p class="section__note">source='category' · depth='2' · countScope='tree'</p>
+    </div>
+    <div class="tree-grid">
+    {cms:channel source='category' depth='2' countScope='tree'}
+      <div class="tree-card [field:class/]">
+        <a class="tree-card__link" href="[field:url/]">[field:label/]<span class="tree-card__count">[field:count/]</span></a>
+        {cms:if field='children'}
+        <ul class="tree-card__sub">
+          {cms:foreach field='children'}
+          <li class="tree-card__subitem [field:class/]"><a href="[field:url/]">[field:label/]</a></li>
+          {/cms:foreach}
+        </ul>
+        {/cms:if}
+      </div>
+    {/cms:channel}
+    </div>
+  </section>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      <div class="section__head">
+        <h2 class="section__title">本栏目内容</h2>
+        <p class="section__note">分类索引页的缺省口径：type='all'、category=当前分类</p>
+      </div>
+      {cms:if field='page.empty'}<p class="notice notice--empty">该分类下还没有内容</p>{/cms:if}
+      <div class="card-grid card-grid--2">
+      {cms:list row='8'}
+        {cms:include file='card.html' size='big'/}
+      {/cms:list}
+      </div>
+      {cms:include file='pager.html'/}
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

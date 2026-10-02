@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsCategoryMapper">
+
+    <!-- 各分类下未删除内容数（后台分类树的口径：草稿也算，与发布引擎的
+         已发布时间窗口口径不同，见 CmsContentCategoryMapper.selectCategoryCounts） -->
+    <select id="selectContentCounts" resultType="com.lingjiuw.cms.module.cms.dto.CategoryContentCount">
+        select cc.category_id as categoryId, count(distinct c.id) as count
+          from cms_content_category cc
+          join cms_content c on c.id = cc.content_id and c.deleted = 0
+         where cc.deleted = 0
+         group by cc.category_id
+    </select>
+
+</mapper>

@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: lingjiuw-cms
+  # 认证完全由 JWT 承担，关闭默认 in-memory 用户自动配置（避免启动噪音告警）
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/lingjiuw_cms
+    username: cms
+    password: cms123456
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # 连接会话时区必须与 JVM 一致。时间列是 timestamp without time zone，写进去的是 JVM 的本地时间，
+      # 而发布引擎的时间窗（static-publish.md §6.3）在 SQL 里用 now() 比较：
+      # 会话时区不一致时，PostgreSQL 会把那个本地时间按会话时区解释成时间点，
+      # 于是"刚发布"的内容被判定成"还没到发布时间"——默认 UTC 的库上正好差一个时区偏移（这里 8 小时），
+      # 表现是"保存成已发布 → 一键静态化，新内容不在产物里"，而且不报错。
+      # 换部署环境时按 JVM 的时区改这里（或设环境变量 CMS_DB_TIMEZONE）。
+      connection-init-sql: SET TIME ZONE '${CMS_DB_TIMEZONE:Asia/Shanghai}'
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+
+server:
+  port: 8081
+
+mybatis-plus:
+  # SQL 一律写在 XML 映射文件里，Java 侧只留 Mapper 接口（见 backend/AGENTS.md）
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+cms:
+  jwt:
+    # 生产环境请用环境变量 CMS_JWT_SECRET 覆盖，至少 32 字节（HS256 要求）
+    secret: dev-only-change-me-32-bytes-key!
+    expire-hours: 12
+  upload:
+    dir: ./uploads
+    url-prefix: /uploads
+  site:
+    # 站点目录白名单根：站点的网站文件目录只能是它下面的子目录，后台的「选择/新建文件夹」不会越界
+    root-dir: ./sites
+  preview:
+    # 「预览站点」的端口基数：真实端口 = 基数 + 站点 id（演示站 8096），只监听 127.0.0.1。
+    # 预览把已发布的 www/ 直接挂在 "/" 下，所以必须独占一个端口，不能挂在后台的路径下。
+    port: 8090
+
+logging:
+  level:
+    com.lingjiuw.cms: info

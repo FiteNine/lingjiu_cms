@@ -1,0 +1,76 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <!-- 筛选落地页（§7.4）：channel 是这个筛选组合（label / slug / url / facetPath / count）。
+       列表的 where 条件由引擎按本页的 facetPath 注入，模板不写 where。 -->
+  <header class="page-head">
+    <p class="page-head__eyebrow">筛选落地页 · facet_list.html</p>
+    <h1 class="page-head__title">[field:channel.label/]</h1>
+    <p class="page-head__meta">
+      <code class="path-chip">/f/[field:channel.facetPath/]/</code>
+      <span class="dot" aria-hidden="true">·</span>
+      <span>共 [field:channel.count/] 款 · 默认 noindex</span>
+    </p>
+    {cms:if field='page.noindex'}<p class="notice notice--quiet">本页 robots：[field:page.robots/]（筛选页默认不进索引，§7.4）</p>{/cms:if}
+  </header>
+
+  <section class="facet-bar facet-bar--page">
+    <div class="facet-bar__group">
+      <p class="facet-bar__label">品牌</p>
+      <div class="facet-bar__values">
+      {cms:channel source='facet' field='brand' row='6'}
+        {cms:if field='urlWith'}<a class="facet-chip facet-chip--add" href="[field:urlWith/]">＋[field:label/]</a>{cms:else/}<a class="facet-chip [field:class/]" href="[field:url/]" aria-current="[field:current show='true'/]">[field:label/]<span class="facet-chip__count">[field:count/]</span></a>{/cms:if}
+      {/cms:channel}
+      </div>
+    </div>
+    <div class="facet-bar__group">
+      <p class="facet-bar__label">地区</p>
+      <div class="facet-bar__values">
+      {cms:channel source='facet' field='region' row='6'}
+        {cms:if field='urlWith'}<a class="facet-chip facet-chip--add" href="[field:urlWith/]">＋[field:label/]</a>{cms:else/}<a class="facet-chip [field:class/]" href="[field:url/]" aria-current="[field:current show='true'/]">[field:label/]<span class="facet-chip__count">[field:count/]</span></a>{/cms:if}
+      {/cms:channel}
+      </div>
+    </div>
+  </section>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      {cms:if field='page.empty'}<p class="notice notice--empty">这个筛选组合下暂时没有产品</p>{/cms:if}
+      <div class="card-grid card-grid--3">
+      {cms:list type='product' category='all' row='24' orderby='publishTime desc'}
+        <article class="card card--product [field:class/]">
+          <a class="card__figure" href="[field:url/]" tabindex="-1" aria-hidden="true">
+          {cms:if field='cover'}
+            <img class="card__img" src="[field:cover size='thumb'/]" alt="[field:title/]" width="320" height="200" loading="lazy" decoding="async">
+          {cms:else/}
+            <span class="card__img card__img--blank">灵</span>
+          {/cms:if}
+          </a>
+          <div class="card__body">
+            <p class="card__eyebrow">
+              <span class="card__type">[field:brand format='label'/]</span>
+              <span class="card__region">[field:region format='label'/]</span>
+            </p>
+            <h3 class="card__title"><a class="card__link" href="[field:url/]">[field:title/]</a></h3>
+            <p class="card__price"><span class="price">[field:price money='1'/]</span><span class="card__stock">库存 [field:stock/]</span></p>
+          </div>
+        </article>
+      {/cms:list}
+      </div>
+      {cms:include file='pager.html'/}
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

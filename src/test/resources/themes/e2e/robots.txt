@@ -1,0 +1,6 @@
+# e2e fixture theme robots.txt
+User-agent: *
+Disallow: /api/
+Disallow: /search/
+Allow: /
+Sitemap: https://example.com/sitemap.xml

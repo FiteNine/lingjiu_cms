@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>搜索 · 灵久演示站</title>
+<meta name="description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
+<meta name="keywords" content="静态站点,内容管理,Java,模板引擎">
+<meta name="theme-color" content="#0f7a68">
+<link rel="canonical" href="https://demo.lingjiuw.local/search/">
+<meta name="robots" content="noindex,follow">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="灵久演示站">
+<meta property="og:title" content="搜索">
+<meta property="og:url" content="https://demo.lingjiuw.local/search/">
+<meta property="og:image" content="">
+<meta property="og:description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
+<link rel="alternate" type="application/rss+xml" title="灵久演示站 订阅" href="/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+</head>
+<body class="page">
+<a class="skip-link" href="#main">跳到主内容</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true">灵</span>
+      <span class="brand__text">
+        <span class="brand__name">灵久演示站</span>
+        <span class="brand__tag">静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</span>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+      <span class="sr-only">展开导航</span>
+    </button>
+    <nav class="main-nav" id="main-nav" aria-label="主导航">
+      <ul class="main-nav__list">
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/" aria-current="">首页</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/news/" aria-current="">新闻</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/product/" aria-current="">产品</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/book/" aria-current="">书籍</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/author/" aria-current="">作者</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/about/" aria-current="">关于</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/contact/" aria-current="">联系</a>
+          
+        </li>
+      
+      </ul>
+      <form class="nav-search" action="/search/" method="get" role="search" data-cms-search>
+        <label class="sr-only" for="nav-q">站内搜索</label>
+        <input class="nav-search__input" id="nav-q" type="search" name="q" placeholder="搜索…" autocomplete="off">
+        <button class="nav-search__btn" type="submit">搜索</button>
+      </form>
+    </nav>
+  </div>
+</header>
+<main class="site-main" id="main">
+
+<div class="wrap stack">
+
+  <!-- SEARCH 页没有浏览位置：不能有 channel / breadcrumb / list / pagelist（§6.7）。
+       它是 H 类页面：静态壳 + /search/index.json 前端匹配，data-cms-search 是 §7.5 的挂载点。 -->
+  <header class="page-head page-head--center">
+    <p class="page-head__eyebrow">搜索 · search.html</p>
+    <h1 class="page-head__title">站内搜索</h1>
+    <p class="page-head__lede">静态页不带数据库：输入关键词后由 site.js 读取 /search/index.json 在本地匹配，无脚本时请走下方入口。</p>
+  </header>
+
+  <form class="search-form" action="/search/" method="get" role="search" data-cms-search>
+    <label class="sr-only" for="q">搜索关键词</label>
+    <input class="search-form__input" id="q" type="search" name="q" value="" placeholder="试试：模板、发布、Java" autocomplete="off">
+    <button class="search-form__btn btn btn--primary" type="submit">搜索</button>
+  </form>
+
+  
+  <p class="search-result__tip" data-cms-search-tip>输入关键词开始搜索，例如“薄荷主题”。</p>
+  
+
+  
+
+  <div class="search-result" data-cms-search-result aria-live="polite">
+    <p class="state-empty">这里会列出匹配结果。</p>
+  </div>
+
+  <section class="section section--cta">
+    <h2 class="section__title">没有脚本也能找内容</h2>
+    <p class="section__note"><a href="/tags/">全部标签</a> · <a href="/archive/">年月归档</a> · <a href="/rank/">热读榜</a> · <a href="/news/">新闻</a></p>
+    <div class="chip-row">
+    
+      <a class="chip " href="/tag/java/">Java<span class="chip__count">26</span></a>
+    
+      <a class="chip " href="/tag/cms/">内容管理<span class="chip__count">21</span></a>
+    
+      <a class="chip " href="/tag/static/">静态化<span class="chip__count">18</span></a>
+    
+      <a class="chip " href="/tag/design/">设计<span class="chip__count">10</span></a>
+    
+      <a class="chip " href="/tag/template/">模板引擎<span class="chip__count">8</span></a>
+    
+    </div>
+  </section>
+
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-col footer-col--about">
+      <p class="footer-brand">灵久演示站</p>
+      <p class="footer-desc">静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</p>
+      <p class="footer-contact">电话 <a href="tel:010-88880000">010-88880000</a></p>
+      <p class="footer-contact">邮箱 <a href="mailto:demo@lingjiuw.local">demo@lingjiuw.local</a></p>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">栏目</h2>
+      <ul class="footer-links">
+      
+        <li class="footer-links__item"><a class="footer-links__link " href="/news/">新闻<span class="footer-links__count">16</span></a></li>
+      
+        <li class="footer-links__item"><a class="footer-links__link " href="/case/">案例<span class="footer-links__count">9</span></a></li>
+      
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">内容类型</h2>
+      <div class="chip-row chip-row--footer">
+      
+        <a class="chip " href="/article/">文章</a>
+      
+        <a class="chip " href="/product/">产品</a>
+      
+        <a class="chip " href="/book/">书籍</a>
+      
+        <a class="chip " href="/chapter/">章节</a>
+      
+        <a class="chip " href="/author/">作者</a>
+      
+        <a class="chip " href="/about/">关于我们</a>
+      
+        <a class="chip " href="/contact/">联系我们</a>
+      
+        <a class="chip " href="/single/">单页</a>
+      
+      </div>
+      <h2 class="footer-col__title">标签</h2>
+      <div class="tagcloud tagcloud--footer">
+      
+        <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
+      
+        <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+      
+        <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+      
+        <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
+      
+        <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+      
+      </div>
+    </div>
+  </div>
+  <div class="wrap site-footer__legal">
+    <p class="site-footer__copy">© 2026 灵久演示站　京ICP备2026000000号</p>
+    <p class="site-footer__ops">
+      <a href="/tags/">标签总览</a>
+      <a href="/archive/">归档</a>
+      <a href="/rank/">热读榜</a>
+      <a href="/search/">搜索</a>
+      <a href="/feed.xml">RSS</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>
+

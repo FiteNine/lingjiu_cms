@@ -1,0 +1,29 @@
+{cms:include file='header.html'/}
+<h1 class="site-title">[field:site.name/]</h1>
+<p class="site-desc">[field:site.description/]</p>
+<section class="latest">
+  <h2>最新文章</h2>
+  <ul class="card-list">
+  {cms:list type='article' category='all' row='2'}
+    <li class="card [field:class/]">
+      <a href="[field:url/]">[field:title/]</a>
+      <time datetime="[field:publishTime format='Y-m-d'/]">[field:publishTime format='Y-m-d'/]</time>
+      <p class="summary">[field:summary/]</p>
+    </li>
+  {/cms:list}
+  </ul>
+  {cms:if field='page.empty'}<p class="empty">本站还没有内容</p>{/cms:if}
+  <nav class="pager">
+  {cms:pagelist listsize='3'}
+    <a class="[field:class/]" href="[field:url/]" rel="[field:rel/]">[field:label/]</a>
+  {/cms:pagelist}
+  </nav>
+</section>
+<aside class="hot">
+  <h2>最多浏览</h2>
+  {cms:query type='article' category='all' orderby='viewCount' row='3' name='hot'}
+    <a class="hot-item" href="[field:url/]">[field:title/]</a>
+  {/cms:query}
+  {cms:if field='query.hot.empty'}<p class="empty">暂时没有数据</p>{/cms:if}
+</aside>
+{cms:include file='footer.html'/}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsContentCategoryMapper">
+
+    <!--
+      内容 ↔ 分类（static-publish.md §2.4）。两条口径：
+        * deleted = 0 自己写（XML 不自动带逻辑删除，见 backend/AGENTS.md）；
+        * 计数走 CmsContentMapper 的 publishWindow 片段——导航上的数字与列表同一个时间窗（§6.3）。
+    -->
+
+    <!-- 每个分类下已发布内容的条数（CountScope.node 口径；tree 口径在 Java 侧按子树求和）。 -->
+    <select id="selectCategoryCounts"
+            resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$CategoryCountRow">
+        select cc.category_id as categoryId, count(distinct c.id) as count
+          from cms_content_category cc
+          join cms_content c on c.id = cc.content_id
+         where cc.deleted = 0
+           and c.site_id = #{p.siteId}
+           and c.deleted = 0
+           <include refid="com.lingjiuw.cms.module.cms.mapper.CmsContentMapper.publishWindow"/>
+         group by cc.category_id
+    </select>
+
+    <!-- 一页内容的分类关联（批量取，避免逐条 SQL）。 -->
+    <select id="selectContentCategories"
+            resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$RelationRow">
+        select cc.content_id as contentId, cc.category_id as refId, cc.dimension as dimension
+          from cms_content_category cc
+         where cc.deleted = 0
+           and cc.content_id in
+           <foreach collection="contentIds" item="cid" open="(" separator="," close=")">
+               #{cid}
+           </foreach>
+    </select>
+
+    <!--
+      保存内容时整批重建（先删旧行再插新行，同一事务内）。dimension 由 Java 侧成组传入：
+      primary 一次只传一个 id——唯一索引 uk_cms_content_category_primary 会拦第二个。
+      逻辑删除列显式给 0（XML 语句不自动带逻辑删除条件，backend/AGENTS.md）。
+    -->
+    <insert id="insertBatch">
+        insert into cms_content_category (content_id, category_id, dimension, deleted) values
+        <foreach collection="categoryIds" item="cid" separator=",">
+            (#{contentId}, #{cid}, #{dimension}, 0)
+        </foreach>
+    </insert>
+
+</mapper>

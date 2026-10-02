@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="[field:site.lang/]">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>[field:page.title/] · [field:site.name/]</title>
+<meta name="description" content="[field:site.seoDescription/]">
+<meta name="keywords" content="[field:site.keywords/]">
+<meta name="theme-color" content="#0f7a68">
+<link rel="canonical" href="[field:page.canonical/]">
+{cms:if field='page.noindex'}<meta name="robots" content="[field:page.robots/]">{/cms:if}
+{cms:foreach field='site.alternates'}<link rel="alternate" hreflang="[field:lang/]" href="[field:url/]">
+{/cms:foreach}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="[field:site.name/]">
+<meta property="og:title" content="[field:page.title/]">
+<meta property="og:url" content="[field:page.canonical/]">
+<meta property="og:image" content="[field:site.ogImage/]">
+<meta property="og:description" content="[field:site.seoDescription/]">
+<link rel="alternate" type="application/rss+xml" title="[field:site.name/] 订阅" href="/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+</head>
+<body class="page">
+<a class="skip-link" href="#main">跳到主内容</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true">灵</span>
+      <span class="brand__text">
+        <span class="brand__name">[field:site.name/]</span>
+        <span class="brand__tag">[field:site.description/]</span>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+      <span class="sr-only">展开导航</span>
+    </button>
+    <nav class="main-nav" id="main-nav" aria-label="主导航">
+      <ul class="main-nav__list">
+      {cms:channel source='menu' code='main' depth='2'}
+        <li class="main-nav__item [field:class/]">
+          <a class="main-nav__link" href="[field:url/]" aria-current="[field:current show='page'/]">[field:label/]</a>
+          {cms:if field='children'}
+          <ul class="main-nav__sub">
+            {cms:foreach field='children'}
+            <li class="main-nav__subitem [field:class/]"><a class="main-nav__sublink" href="[field:url/]" aria-current="[field:current show='page'/]">[field:label/]</a></li>
+            {/cms:foreach}
+          </ul>
+          {/cms:if}
+        </li>
+      {/cms:channel}
+      </ul>
+      <form class="nav-search" action="/search/" method="get" role="search" data-cms-search>
+        <label class="sr-only" for="nav-q">站内搜索</label>
+        <input class="nav-search__input" id="nav-q" type="search" name="q" placeholder="搜索…" autocomplete="off">
+        <button class="nav-search__btn" type="submit">搜索</button>
+      </form>
+    </nav>
+  </div>
+</header>
+<main class="site-main" id="main">

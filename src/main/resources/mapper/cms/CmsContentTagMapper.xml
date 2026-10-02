@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsContentTagMapper">
+
+    <!--
+      内容 ↔ 标签（static-publish.md §2.4、§6.4 的 {cms:tagnav}）。
+      typeCode 为空 / all 时按标签 id 分组即"跨类型按 slug 合并"——slug 在站点内唯一（§2.4）。
+    -->
+
+    <!-- 标签与它的内容数：count 与列表同一个时间窗（§6.3）。 -->
+    <select id="selectTagCounts" resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$TagCountRow">
+        select t.id as id, t.name as name, t.slug as slug, count(distinct c.id) as count
+          from cms_tag t
+          join cms_content_tag ct on ct.tag_id = t.id and ct.deleted = 0
+          join cms_content c on c.id = ct.content_id
+         where t.site_id = #{p.siteId}
+           and t.deleted = 0
+           and c.site_id = #{p.siteId}
+           and c.deleted = 0
+           <include refid="com.lingjiuw.cms.module.cms.mapper.CmsContentMapper.publishWindow"/>
+           <include refid="com.lingjiuw.cms.module.cms.mapper.CmsContentMapper.typeFilter"/>
+         group by t.id, t.name, t.slug
+        having count(distinct c.id) &gt;= #{minCount}
+        <choose>
+            <when test='orderby == "name"'>order by t.name asc, t.id asc</when>
+            <when test='orderby == "sort"'>order by t.id asc</when>
+            <otherwise>order by count(distinct c.id) desc, t.id asc</otherwise>
+        </choose>
+        <if test="limit &gt; 0">
+            limit #{limit}
+        </if>
+    </select>
+
+    <!-- 一页内容的标签关联（批量取，避免逐条 SQL）。 -->
+    <select id="selectContentTags"
+            resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$RelationRow">
+        select ct.content_id as contentId, ct.tag_id as refId
+          from cms_content_tag ct
+         where ct.deleted = 0
+           and ct.content_id in
+           <foreach collection="contentIds" item="cid" open="(" separator="," close=")">
+               #{cid}
+           </foreach>
+    </select>
+
+    <!-- 保存内容时整批重建（先删旧行再插新行，同一事务内）。
+         逻辑删除列显式给 0（XML 语句不自动带逻辑删除条件，backend/AGENTS.md）。 -->
+    <insert id="insertBatch">
+        insert into cms_content_tag (content_id, tag_id, deleted) values
+        <foreach collection="tagIds" item="tid" separator=",">
+            (#{contentId}, #{tid}, 0)
+        </foreach>
+    </insert>
+
+</mapper>

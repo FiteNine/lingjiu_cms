@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>内容管理实践 · 灵久演示站</title>
+<meta name="description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
+<meta name="keywords" content="静态站点,内容管理,Java,模板引擎">
+<meta name="theme-color" content="#0f7a68">
+<link rel="canonical" href="https://demo.lingjiuw.local/book/cms-practice.html">
+
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="灵久演示站">
+<meta property="og:title" content="内容管理实践">
+<meta property="og:url" content="https://demo.lingjiuw.local/book/cms-practice.html">
+<meta property="og:image" content="">
+<meta property="og:description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
+<link rel="alternate" type="application/rss+xml" title="灵久演示站 订阅" href="/feed.xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+</head>
+<body class="page">
+<a class="skip-link" href="#main">跳到主内容</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true">灵</span>
+      <span class="brand__text">
+        <span class="brand__name">灵久演示站</span>
+        <span class="brand__tag">静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</span>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+      <span class="sr-only">展开导航</span>
+    </button>
+    <nav class="main-nav" id="main-nav" aria-label="主导航">
+      <ul class="main-nav__list">
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/" aria-current="">首页</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/news/" aria-current="">新闻</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/product/" aria-current="">产品</a>
+          
+        </li>
+      
+        <li class="main-nav__item active">
+          <a class="main-nav__link" href="/book/" aria-current="page">书籍</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/author/" aria-current="">作者</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/about/" aria-current="">关于</a>
+          
+        </li>
+      
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/contact/" aria-current="">联系</a>
+          
+        </li>
+      
+      </ul>
+      <form class="nav-search" action="/search/" method="get" role="search" data-cms-search>
+        <label class="sr-only" for="nav-q">站内搜索</label>
+        <input class="nav-search__input" id="nav-q" type="search" name="q" placeholder="搜索…" autocomplete="off">
+        <button class="nav-search__btn" type="submit">搜索</button>
+      </form>
+    </nav>
+  </div>
+</header>
+<main class="site-main" id="main">
+
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    
+      <li class="crumbs__item ">
+      <a class="crumbs__link" href="/">灵久演示站</a>
+      </li>
+    
+      <li class="crumbs__item current">
+      <span class="crumbs__current" aria-current="page">内容管理实践</span>
+      </li>
+    
+    </ol>
+  </nav>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+
+      <!-- 只在第 1 页渲染简介（page.isFirst）；目录是这一页的分页主体，必须在 if 块外面。 -->
+      
+      <header class="book-head">
+        <p class="book-head__eyebrow">
+          <span class="badge">书籍</span>
+          <span class="badge badge--ghost">连载中</span>
+        </p>
+        <h1 class="book-head__title">内容管理实践</h1>
+        <p class="book-head__meta">
+          <span class="book-head__author">作者：苏晴</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>共 0 章</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <time datetime="2025-11-20T13:40:00">2025-11-20 上架</time>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>7300 次阅读</span>
+        </p>
+        <p class="book-head__lede">内容类型、字段定义与索引表：不做动态 DDL 的组织方式。</p>
+        <div class="chip-row">
+        
+          <a class="chip" href="/tag/java/">Java</a>
+        
+          <a class="chip" href="/tag/template/">模板引擎</a>
+        
+        </div>
+      </header>
+      
+
+      <!-- 内容树：source='content' + depth='2'（§6.4）。
+           起始节点只能是字面量，所以它列出的是该类型的顶层内容（书库），而不是"这本书的卷章"；
+           这本书自己的目录在下面用 list 标签的 of='self' 表达。
+           这里不读 children：只有"每个节点都有子节点"时它才存在，书库里做不到（见报告里的引擎缺口）。 -->
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">书库</h2>
+          <p class="section__note">channel source='content' type='book' depth='2'</p>
+        </div>
+        <div class="tree-grid">
+        
+          <div class="tree-card ">
+            <a class="tree-card__link" href="/book/static-site-notes.html">静态站点笔记<span class="tree-card__count">0 章</span></a>
+          </div>
+        
+          <div class="tree-card ">
+            <a class="tree-card__link" href="/book/template-engine.html">模板引擎手记<span class="tree-card__count">0 章</span></a>
+          </div>
+        
+          <div class="tree-card active">
+            <a class="tree-card__link" href="/book/cms-practice.html">内容管理实践<span class="tree-card__count">0 章</span></a>
+          </div>
+        
+        </div>
+      </section>
+
+      <!-- 最新章节：of='self'（锚定项 = 这本书） -->
+      <section class="section section--latest">
+        <div class="section__head">
+          <h2 class="section__title">最新章节</h2>
+          <p class="section__note">query type='chapter' of='self' row='5'</p>
+        </div>
+        <ol class="latest-list">
+        
+          <li class="latest-list__item ">
+            <a class="latest-list__link" href="/book/cms-practice/chapter-09.html">用菜单表达当前页</a>
+            <time class="latest-list__time" datetime="2025-12-18T15:30:00">9 个月前</time>
+          </li>
+        
+          <li class="latest-list__item ">
+            <a class="latest-list__link" href="/book/cms-practice/chapter-07.html">多语言即多站点</a>
+            <time class="latest-list__time" datetime="2025-12-10T09:10:00">9 个月前</time>
+          </li>
+        
+          <li class="latest-list__item ">
+            <a class="latest-list__link" href="/book/cms-practice/chapter-05.html">正文分页与目录</a>
+            <time class="latest-list__time" datetime="2025-12-02T11:40:00">10 个月前</time>
+          </li>
+        
+          <li class="latest-list__item ">
+            <a class="latest-list__link" href="/book/cms-practice/chapter-03.html">字段定义与索引表</a>
+            <time class="latest-list__time" datetime="2025-11-25T10:20:00">10 个月前</time>
+          </li>
+        
+          <li class="latest-list__item ">
+            <a class="latest-list__link" href="/book/cms-practice/chapter-02.html">内容类型与页面类型</a>
+            <time class="latest-list__time" datetime="2025-11-20T13:50:00">10 个月前</time>
+          </li>
+        
+        </ol>
+      </section>
+
+      <!-- 目录：详情页上的可分页列表（of='self'），分页 URL 走 detail_url_pattern 的 {n} 形态 -->
+      <section class="section section--catalog">
+        <div class="section__head">
+          <h2 class="section__title">章节目录</h2>
+          <p class="section__note">每页 100 章 · 共 0 章</p>
+        </div>
+        
+        <ol class="catalog">
+        
+          <li class="catalog__item ">
+            <a class="catalog__link" href="/book/cms-practice/chapter-02.html"><span class="catalog__no">13</span>内容类型与页面类型</a>
+            <span class="catalog__meta">卷一</span>
+          </li>
+        
+          <li class="catalog__item ">
+            <a class="catalog__link" href="/book/cms-practice/chapter-03.html"><span class="catalog__no">15</span>字段定义与索引表</a>
+            <span class="catalog__meta">卷一</span>
+          </li>
+        
+          <li class="catalog__item ">
+            <a class="catalog__link" href="/book/cms-practice/chapter-05.html"><span class="catalog__no">17</span>正文分页与目录</a>
+            <span class="catalog__meta">卷一</span>
+          </li>
+        
+          <li class="catalog__item ">
+            <a class="catalog__link" href="/book/cms-practice/chapter-07.html"><span class="catalog__no">20</span>多语言即多站点</a>
+            <span class="catalog__meta">卷二</span>
+          </li>
+        
+          <li class="catalog__item ">
+            <a class="catalog__link" href="/book/cms-practice/chapter-09.html"><span class="catalog__no">22</span>用菜单表达当前页</a>
+            <span class="catalog__meta">卷二</span>
+          </li>
+        
+        </ol>
+        <!-- 第二种分页条组合：listsize='3'、只要 上一页/页码/当前页/下一页 -->
+        
+        <nav class="pager pager--compact" aria-label="目录分页">
+          <div class="pager__list">
+          
+          </div>
+        </nav>
+        
+      </section>
+
+      <!-- 同类书：orderby='viewCount desc'，不分页 -->
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">大家都在看</h2>
+          <p class="section__note">query type='book' row='4' orderby='viewCount desc'</p>
+        </div>
+        <div class="card-grid card-grid--3">
+        
+          <!-- 通用内容卡片：被多个列表模板 include，size='big' / 'compact' 通过 include 字面量参数传入。
+     只使用"跨类型公共字段"，因此在 type='all' 的列表里也能编译通过（§6.3）。 -->
+<article class="card card--compact ">
+  <a class="card__figure" href="/book/static-site-notes.html" tabindex="-1" aria-hidden="true">
+  
+    <img class="card__img" src="/uploads/demo/book-static.jpg" alt="静态站点笔记" width="320" height="200" loading="lazy" decoding="async">
+  
+  </a>
+  <div class="card__body">
+    <p class="card__eyebrow">
+      <span class="card__type">书籍</span>
+      <span class="badge badge--top">置顶</span>
+      
+    </p>
+    <h3 class="card__title"><a class="card__link" href="/book/static-site-notes.html">静态站点笔记</a></h3>
+    <p class="card__summary">把内容变成文件：从页面计划、增量依赖到产物回收的完整笔记。</p>
+    <p class="card__meta">
+      <time class="card__time" datetime="2025-09-12T08:00:00">2025-09-12</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span class="card__views">1.6万 阅读</span>
+    </p>
+  </div>
+</article>
+
+        
+          <!-- 通用内容卡片：被多个列表模板 include，size='big' / 'compact' 通过 include 字面量参数传入。
+     只使用"跨类型公共字段"，因此在 type='all' 的列表里也能编译通过（§6.3）。 -->
+<article class="card card--compact ">
+  <a class="card__figure" href="/book/template-engine.html" tabindex="-1" aria-hidden="true">
+  
+    <img class="card__img" src="/uploads/demo/book-template.jpg" alt="模板引擎手记" width="320" height="200" loading="lazy" decoding="async">
+  
+  </a>
+  <div class="card__body">
+    <p class="card__eyebrow">
+      <span class="card__type">书籍</span>
+      
+      <span class="badge badge--recommend">推荐</span>
+    </p>
+    <h3 class="card__title"><a class="card__link" href="/book/template-engine.html">模板引擎手记</a></h3>
+    <p class="card__summary">从词法扫描到编译期校验，手写一个只认识业务字段的小引擎。</p>
+    <p class="card__meta">
+      <time class="card__time" datetime="2025-10-08T09:20:00">2025-10-08</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span class="card__views">9800 阅读</span>
+    </p>
+  </div>
+</article>
+
+        
+          <!-- 通用内容卡片：被多个列表模板 include，size='big' / 'compact' 通过 include 字面量参数传入。
+     只使用"跨类型公共字段"，因此在 type='all' 的列表里也能编译通过（§6.3）。 -->
+<article class="card card--compact current">
+  <a class="card__figure" href="/book/cms-practice.html" tabindex="-1" aria-hidden="true">
+  
+    <img class="card__img" src="/uploads/demo/book-cms.jpg" alt="内容管理实践" width="320" height="200" loading="lazy" decoding="async">
+  
+  </a>
+  <div class="card__body">
+    <p class="card__eyebrow">
+      <span class="card__type">书籍</span>
+      
+      
+    </p>
+    <h3 class="card__title"><a class="card__link" href="/book/cms-practice.html">内容管理实践</a></h3>
+    <p class="card__summary">内容类型、字段定义与索引表：不做动态 DDL 的组织方式。</p>
+    <p class="card__meta">
+      <time class="card__time" datetime="2025-11-20T13:40:00">2025-11-20</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span class="card__views">7300 阅读</span>
+    </p>
+  </div>
+</article>
+
+        
+        </div>
+      </section>
+
+      <nav class="prenext" aria-label="上下本">
+        
+          <a class="prenext__link prenext__link--next" data-dir="next" rel="next" href="/book/template-engine.html"><span class="prenext__dir"></span><span class="prenext__title">模板引擎手记</span></a>
+        
+      </nav>
+
+    </div>
+    <!-- 侧栏：热门（orderby + offset）、栏目树（channel source='category' + children）、
+     标签云（tagnav row/minCount）、年度归档（archive mode='year'）。
+     所有查询都显式给 type 与 category，因此可以放进任何页面类型（首页 / 标签页 / 归档页 / 筛选页都行）。 -->
+<aside class="aside" aria-label="站点侧栏">
+
+  <section class="widget widget--rank">
+    <h2 class="widget__title">热读周榜</h2>
+    
+    <ol class="widget__list widget__list--rank">
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/book/static-site-notes.html">静态站点笔记</a>
+        <span class="widget__stat">5587</span>
+      </li>
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/book/template-engine.html">模板引擎手记</a>
+        <span class="widget__stat">4177</span>
+      </li>
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/product/acme-gateway-x1.html">Acme 边缘网关 X1</a>
+        <span class="widget__stat">3080</span>
+      </li>
+    
+      <li class="widget__item current">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/book/cms-practice.html">内容管理实践</a>
+        <span class="widget__stat">2713</span>
+      </li>
+    
+      <li class="widget__item ">
+        <span class="widget__no" aria-hidden="true"></span>
+        <a class="widget__link" href="/product/globex-monitor-m3.html">Globex 监控探针 M3</a>
+        <span class="widget__stat">2353</span>
+      </li>
+    
+    </ol>
+  </section>
+
+  <section class="widget widget--fresh">
+    <h2 class="widget__title">刚刚更新</h2>
+    <ul class="widget__list">
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/case/facet-pages-are-configured.html">筛选落地页是配置出来的</a>
+        <time class="widget__time" datetime="2026-03-03T09:40:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/news/tech/toc-and-body-pagination.html">正文分页与目录的配合</a>
+        <time class="widget__time" datetime="2026-02-27T16:20:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/product/initech-search-box.html">Initech 站内搜索盒</a>
+        <time class="widget__time" datetime="2026-02-25T13:30:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/news/search-index-without-tokenizer.html">没有分词器也能搜索</a>
+        <time class="widget__time" datetime="2026-02-22T13:10:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/news/tech/render-scope-and-field.html">渲染作用域与字段解析</a>
+        <time class="widget__time" datetime="2026-02-16T10:45:00">7 个月前</time>
+      </li>
+    
+    </ul>
+  </section>
+
+  <section class="widget widget--tree">
+    <h2 class="widget__title">栏目导览</h2>
+    <ul class="widget__list widget__list--tree">
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/news/">新闻<span class="widget__stat">16</span></a>
+      </li>
+    
+      <li class="widget__item ">
+        <a class="widget__link" href="/case/">案例<span class="widget__stat">9</span></a>
+      </li>
+    
+    </ul>
+  </section>
+
+  <section class="widget widget--tags">
+    <h2 class="widget__title">热门标签</h2>
+    <div class="tagcloud">
+    
+      <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
+    
+      <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+    
+      <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+    
+      <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
+    
+      <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+    
+    </div>
+    <p class="widget__more"><a href="/tags/">全部标签 →</a></p>
+  </section>
+
+  <section class="widget widget--archive">
+    <h2 class="widget__title">年度归档</h2>
+    <ul class="archive-list">
+    
+      <li class="archive-list__item ">
+        <a class="archive-list__link" href="/archive/2026/01/">2026 年 1 月</a>
+        <span class="archive-list__count">21 篇</span>
+      </li>
+    
+      <li class="archive-list__item ">
+        <a class="archive-list__link" href="/archive/2025/01/">2025 年 1 月</a>
+        <span class="archive-list__count">25 篇</span>
+      </li>
+    
+    </ul>
+    <p class="widget__more"><a href="/archive/">按月份看 →</a></p>
+  </section>
+
+  <section class="widget widget--cta">
+    <h2 class="widget__title">本站在做什么</h2>
+    <p class="widget__text">薄荷主题是模板引擎的示例站：14 个标签、9 种页面形态、一套静态发布产物。</p>
+    <p class="widget__more"><a class="btn btn--ghost" href="/about/">关于我们</a></p>
+  </section>
+
+</aside>
+
+  </div>
+
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-col footer-col--about">
+      <p class="footer-brand">灵久演示站</p>
+      <p class="footer-desc">静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</p>
+      <p class="footer-contact">电话 <a href="tel:010-88880000">010-88880000</a></p>
+      <p class="footer-contact">邮箱 <a href="mailto:demo@lingjiuw.local">demo@lingjiuw.local</a></p>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">栏目</h2>
+      <ul class="footer-links">
+      
+        <li class="footer-links__item"><a class="footer-links__link " href="/news/">新闻<span class="footer-links__count">16</span></a></li>
+      
+        <li class="footer-links__item"><a class="footer-links__link " href="/case/">案例<span class="footer-links__count">9</span></a></li>
+      
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">内容类型</h2>
+      <div class="chip-row chip-row--footer">
+      
+        <a class="chip " href="/article/">文章</a>
+      
+        <a class="chip " href="/product/">产品</a>
+      
+        <a class="chip current" href="/book/">书籍</a>
+      
+        <a class="chip " href="/chapter/">章节</a>
+      
+        <a class="chip " href="/author/">作者</a>
+      
+        <a class="chip " href="/about/">关于我们</a>
+      
+        <a class="chip " href="/contact/">联系我们</a>
+      
+        <a class="chip " href="/single/">单页</a>
+      
+      </div>
+      <h2 class="footer-col__title">标签</h2>
+      <div class="tagcloud tagcloud--footer">
+      
+        <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
+      
+        <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+      
+        <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+      
+        <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
+      
+        <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+      
+      </div>
+    </div>
+  </div>
+  <div class="wrap site-footer__legal">
+    <p class="site-footer__copy">© 2026 灵久演示站　京ICP备2026000000号</p>
+    <p class="site-footer__ops">
+      <a href="/tags/">标签总览</a>
+      <a href="/archive/">归档</a>
+      <a href="/rank/">热读榜</a>
+      <a href="/search/">搜索</a>
+      <a href="/feed.xml">RSS</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>
+

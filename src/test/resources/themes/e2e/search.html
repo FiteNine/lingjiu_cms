@@ -1,0 +1,10 @@
+{cms:include file='header.html'/}
+<h1 class="channel-title">搜索</h1>
+<form class="search-form" action="/search/" method="get" data-cms-search>
+  <input type="search" name="q" value="[field:param.q/]" placeholder="搜索…">
+  <button type="submit">搜索</button>
+</form>
+<div class="search-result" data-cms-search-result>
+  {cms:if field='param.q'}<p class="tip">正在搜索…（无 JS 时请稍后重试）</p>{/cms:if}
+</div>
+{cms:include file='footer.html'/}

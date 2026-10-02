@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsSiteMapper">
+
+    <!-- 系统默认站点：迁移保证有且仅有一个，取一条即可 -->
+    <select id="selectDefaultSite" resultType="com.lingjiuw.cms.module.cms.entity.CmsSite">
+        select * from cms_site where is_default = 1 and deleted = 0 limit 1
+    </select>
+
+    <!--
+      静态发布的站点配置（static-publish.md §2.7、§5.1 的 site 作用域）。
+      显式列出 §2.7（2）的 6 个列（迁移 V20261002090004 加的；实体 CmsSite 现在也有它们了），
+      因为 site 作用域的 22 个 key 一个都不能少。
+    -->
+    <select id="selectPublishSite" resultType="com.lingjiuw.cms.module.cms.publish.provider.SiteRow">
+        select id, name, code, domain, logo, description, keywords, seo_description, root_dir,
+               icp, contact_phone, contact_email, lang, default_cover, og_image, theme, protocol,
+               statistics_code
+          from cms_site
+         where id = #{siteId} and deleted = 0
+    </select>
+
+</mapper>

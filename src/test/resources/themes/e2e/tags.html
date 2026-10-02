@@ -1,0 +1,14 @@
+{cms:include file='header.html'/}
+<h1 class="channel-title">标签总览</h1>
+<ul class="tag-cloud">
+{cms:tagnav type='all' row='20' orderby='count' minCount='1'}
+  <li class="tag [field:class/]"><a href="[field:url/]">[field:name/]</a> <span class="count">[field:count/]</span></li>
+{/cms:tagnav}
+</ul>
+<h2>归档</h2>
+<ul class="archive-nav">
+{cms:archive type='article' mode='month' row='12'}
+  <li class="archive [field:class/]"><a href="[field:url/]">[field:label/]</a> <span class="count">[field:count/]</span></li>
+{/cms:archive}
+</ul>
+{cms:include file='footer.html'/}

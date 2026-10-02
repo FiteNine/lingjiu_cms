@@ -1,0 +1,126 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <section class="masthead">
+    <p class="masthead__eyebrow">薄荷 · 演示站</p>
+    <h1 class="masthead__title">[field:site.name/]</h1>
+    <p class="masthead__lede">[field:site.description/]</p>
+    <p class="masthead__meta">
+      <span class="badge">[field:page.pageType/] 模板</span>
+      <span class="dot" aria-hidden="true">·</span>
+      <a href="/feed.xml">RSS 订阅</a>
+      <span class="dot" aria-hidden="true">·</span>
+      <a href="/rank/">热读榜</a>
+    </p>
+  </section>
+
+  <!-- 置顶：top='1'（命名的顶层查询，配 query.<name>.empty 判空） -->
+  <section class="section section--headline">
+    <div class="section__head">
+      <h2 class="section__title">今日头条</h2>
+      <p class="section__note">top='1' 的置顶内容</p>
+    </div>
+    {cms:if field='query.headline.empty'}<p class="notice notice--empty">本站还没有置顶内容</p>{/cms:if}
+    {cms:query type='article' category='all' top='1' row='1' orderby='publishTime desc' name='headline'}
+    <article class="headline [field:class/]">
+      <div class="headline__body">
+        <p class="headline__eyebrow"><span class="badge badge--top">置顶</span><span class="headline__type">[field:typeName/]</span></p>
+        <h3 class="headline__title"><a href="[field:url/]">[field:title/]</a></h3>
+        <p class="headline__summary">[field:summary maxlen='120'/]</p>
+        <p class="headline__meta">
+          <time datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>[field:viewCount format='compact'/] 阅读</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>[field:readingMinutes/] 分钟读完</span>
+        </p>
+      </div>
+      {cms:if field='cover'}<a class="headline__figure" href="[field:url/]" tabindex="-1" aria-hidden="true"><img src="[field:cover size='medium'/]" alt="[field:title/]" width="768" height="432" loading="lazy" decoding="async"></a>{/cms:if}
+    </article>
+    {/cms:query}
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">编辑推荐</h2>
+      <a class="section__more" href="/news/">更多新闻 →</a>
+    </div>
+    <div class="card-grid card-grid--3">
+    {cms:query type='article' category='all' recommend='1' row='3' orderby='publishTime desc'}
+      {cms:include file='card.html' size='big'/}
+    {/cms:query}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">华东精选</h2>
+      <p class="section__note">where='region:eq:huadong'</p>
+    </div>
+    <div class="card-grid card-grid--3">
+    {cms:query type='article' category='all' where='region:eq:huadong' row='3' orderby='publishTime desc'}
+      {cms:include file='card.html' size='compact'/}
+    {/cms:query}
+    </div>
+  </section>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">全站最新</h2>
+          <p class="section__note">type='all' 跨类型混合流</p>
+        </div>
+        {cms:if field='query.latest.empty'}<p class="notice notice--empty">本站还没有发布任何内容</p>{/cms:if}
+        <ol class="feed-list">
+        {cms:query type='all' category='all' row='6' orderby='publishTime desc' name='latest'}
+          <li class="feed-list__item [field:class/]">
+            <time class="feed-list__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+            <a class="feed-list__link" href="[field:url/]">[field:title/]</a>
+            <span class="feed-list__type">[field:typeName/]</span>
+            <span class="feed-list__stat">[field:viewCount format='compact'/]</span>
+          </li>
+        {/cms:query}
+        </ol>
+      </section>
+
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">热读排行</h2>
+          <p class="section__note">orderby='viewCountWeek desc' · <a href="/rank/">完整榜单</a></p>
+        </div>
+        <ol class="rank-list">
+        {cms:query type='article' category='all' row='5' orderby='viewCountWeek desc'}
+          <li class="rank-list__item [field:class/]">
+            <span class="rank-list__no" aria-hidden="true"></span>
+            <div class="rank-list__body">
+              <a class="rank-list__title" href="[field:url/]">[field:title/]</a>
+              <p class="rank-list__meta"><span>[field:typeName/]</span><span class="dot" aria-hidden="true">·</span><time datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time></p>
+            </div>
+            <span class="rank-list__stat">[field:viewCountWeek format='compact'/]</span>
+          </li>
+        {/cms:query}
+        </ol>
+      </section>
+
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">内容总览</h2>
+          <p class="section__note">本页的分页主体：type='all'，每页 6 条</p>
+        </div>
+        {cms:if field='page.empty'}<p class="notice notice--empty">还没有内容</p>{/cms:if}
+        <div class="card-grid card-grid--2">
+        {cms:list type='all' category='all' row='6' orderby='publishTime desc'}
+          {cms:include file='card.html' size='big'/}
+        {/cms:list}
+        </div>
+        {cms:include file='pager.html'/}
+      </section>
+
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

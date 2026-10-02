@@ -1,0 +1,142 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb withContent='1'}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      {cms:detail}
+      <article class="article">
+        <header class="article__head">
+          <p class="article__eyebrow">
+            <span class="badge">[field:typeName/]</span>
+            {cms:if field='featured'}<span class="badge badge--recommend">精选</span>{/cms:if}
+            {cms:if field='top'}<span class="badge badge--top">置顶</span>{/cms:if}
+          </p>
+          <h1 class="article__title">[field:title/]</h1>
+          <p class="article__meta">
+            <time datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+            <span class="dot" aria-hidden="true">·</span>
+            <span class="article__region">[field:region format='label'/]</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span>[field:viewCount format='compact'/] 阅读</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span>[field:readingMinutes/] 分钟 · [field:wordCount/] 字</span>
+          </p>
+          {cms:if field='summary'}<p class="article__lede">[field:summary/]</p>{/cms:if}
+          {cms:if field='cover'}<figure class="article__figure"><img src="[field:cover size='large'/]" alt="[field:title/]" width="1280" height="720" loading="lazy" decoding="async"></figure>{/cms:if}
+        </header>
+
+        {cms:if field='toc'}
+        <nav class="toc" aria-label="正文目录">
+          <p class="toc__title">本文目录</p>
+          <ol class="toc__list">
+          {cms:foreach field='toc'}
+            <li class="toc__item toc-lv[field:level/]"><a class="toc__link" href="[field:url/]">[field:text/]</a></li>
+          {/cms:foreach}
+          </ol>
+        </nav>
+        {/cms:if}
+
+        <div class="article__body content">[field:content/]</div>
+
+        <section class="article__facts">
+          {cms:if field='sku'}<p class="meta__item"><span class="meta__key">编号</span>[field:sku/]</p>{/cms:if}
+          {cms:if field='weight'}<p class="meta__item"><span class="meta__key">净重</span>[field:weight/] g</p>{/cms:if}
+          <p class="meta__item"><span class="meta__key">难度</span>
+          {cms:foreach field='readingLevel'}
+            <span class="chip chip--mini">[field:label/]</span>
+          {/cms:foreach}
+          </p>
+        </section>
+
+        {cms:if field='gallery'}
+        <section class="gallery-block">
+          <h2 class="block-title">图集（[field:gallery.count/] 张）</h2>
+          <div class="gallery">
+          {cms:foreach field='gallery'}
+            <figure class="gallery__item">
+              <img class="gallery__img" src="[field:url/]" alt="[field:alt/]" width="[field:width/]" height="[field:height/]" loading="lazy" decoding="async">
+              <figcaption class="gallery__cap">[field:title/]</figcaption>
+            </figure>
+          {/cms:foreach}
+          </div>
+        </section>
+        {/cms:if}
+
+        {cms:if field='download'}
+        <section class="attach-block">
+          <h2 class="block-title">资料下载</h2>
+          <p class="attach">
+            <a class="btn btn--ghost" href="[field:download/]" download>下载附件（[field:download format='filesize'/]）</a>
+          </p>
+        </section>
+        {/cms:if}
+
+        {cms:if field='relatedProducts'}
+        <section class="related-block">
+          <h2 class="block-title">相关产品</h2>
+          <ul class="related-list">
+          {cms:foreach field='relatedProducts' row='6'}
+            <li class="related-list__item">
+              <a class="related-list__link" href="[field:url/]">[field:title/]</a>
+              <span class="related-list__meta">[field:typeName/]</span>
+            </li>
+          {/cms:foreach}
+          </ul>
+        </section>
+        {/cms:if}
+
+        <footer class="article__foot">
+          <div class="chip-row">
+          {cms:foreach field='tags'}
+            <a class="chip" href="[field:url/]">[field:name/]</a>
+          {/cms:foreach}
+          </div>
+        </footer>
+
+        <!-- 上下篇：type='both' 一次输出两个方向；"到头了"的提示用 hasPrev / hasNext 判（§5.5）。
+             这两个字段由 detail 标签在标签体内提供，所以这段写在标签体里面。
+             方向名由 CSS 按 data-dir 生成，因为模板里没有等值比较（§3.8）。 -->
+        <nav class="prenext" aria-label="上下篇">
+          {cms:prenext type='both' category='all'}
+            <a class="prenext__link prenext__link--[field:type/]" data-dir="[field:type/]" rel="[field:type/]" href="[field:url/]">
+              <span class="prenext__dir"></span>
+              <span class="prenext__title">[field:title/]</span>
+              <time class="prenext__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+            </a>
+          {/cms:prenext}
+          {cms:if field='hasPrev'}{cms:else/}<p class="prenext__hint">已经是第一篇</p>{/cms:if}
+          {cms:if field='hasNext'}{cms:else/}<p class="prenext__hint">已经是最后一篇</p>{/cms:if}
+        </nav>
+      </article>
+      {/cms:detail}
+
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">继续阅读</h2>
+          <p class="section__note">relate='category' 的同栏目内容（query 不分页）</p>
+        </div>
+        <ul class="related-list">
+        {cms:query type='article' category='all' relate='category' exclude='self' row='5' orderby='publishTime desc'}
+          <li class="related-list__item [field:class/]">
+            <a class="related-list__link" href="[field:url/]">[field:title/]</a>
+            <span class="related-list__meta">[field:typeName/]</span>
+          </li>
+        {/cms:query}
+        </ul>
+      </section>
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

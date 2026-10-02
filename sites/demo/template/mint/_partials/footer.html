@@ -1,0 +1,45 @@
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-col footer-col--about">
+      <p class="footer-brand">[field:site.name/]</p>
+      <p class="footer-desc">[field:site.description/]</p>
+      <p class="footer-contact">电话 <a href="tel:[field:site.contactPhone/]">[field:site.contactPhone/]</a></p>
+      <p class="footer-contact">邮箱 <a href="mailto:[field:site.contactEmail/]">[field:site.contactEmail/]</a></p>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">栏目</h2>
+      <ul class="footer-links">
+      {cms:channel source='category' depth='1' countScope='tree'}
+        <li class="footer-links__item"><a class="footer-links__link [field:class/]" href="[field:url/]">[field:label/]<span class="footer-links__count">[field:count/]</span></a></li>
+      {/cms:channel}
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h2 class="footer-col__title">内容类型</h2>
+      <div class="chip-row chip-row--footer">
+      {cms:channel source='type'}
+        <a class="chip [field:class/]" href="[field:url/]">[field:label/]</a>
+      {/cms:channel}
+      </div>
+      <h2 class="footer-col__title">标签</h2>
+      <div class="tagcloud tagcloud--footer">
+      {cms:tagnav type='all' row='12' minCount='1' orderby='count'}
+        <a class="tagcloud__item [field:class/]" href="[field:url/]">[field:name/]<span class="tagcloud__count">[field:count/]</span></a>
+      {/cms:tagnav}
+      </div>
+    </div>
+  </div>
+  <div class="wrap site-footer__legal">
+    <p class="site-footer__copy">© [field:site.year/] [field:site.name/]　[field:site.icp/]</p>
+    <p class="site-footer__ops">
+      <a href="/tags/">标签总览</a>
+      <a href="/archive/">归档</a>
+      <a href="/rank/">热读榜</a>
+      <a href="/search/">搜索</a>
+      <a href="/feed.xml">RSS</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>

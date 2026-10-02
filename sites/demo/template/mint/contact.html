@@ -1,0 +1,80 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <header class="page-head">
+    <p class="page-head__eyebrow">联系我们 · contact.html（SINGLE 类型 contact）</p>
+    <h1 class="page-head__title">[field:title/]</h1>
+    <p class="page-head__meta">电话 <a href="tel:[field:site.contactPhone/]">[field:site.contactPhone/]</a> · 邮箱 <a href="mailto:[field:site.contactEmail/]">[field:site.contactEmail/]</a></p>
+  </header>
+
+  <!-- 提交结果横幅写在 thanks.html（STATIC 页，页面计划会给它注入 param.form_ok / param.form_error，
+       §7.2.3）。本页是 SINGLE，计划期目前不注入 param，因此这里不读 param.* ——
+       否则渲染期会以"具名作用域 param 不存在"（E1004）停在这一页。 -->
+  <div class="layout layout--form">
+    <div class="layout__main">
+      {cms:detail}
+      <section class="contact-form-block">
+        <h2 class="block-title">询价 / 留言</h2>
+        <p class="muted">带 <span class="form__req">*</span> 的是必填项。产品页上的询价会自动带上产品编号。</p>
+
+        <!-- 引擎的表单标签（表单 code = inquiry）等 cms_form 表落地后启用：§9.5 属于后续阶段，
+             当前种子迁移里还没有这张表，写上它会让本页以 E2008 发布失败。
+             下面这段 HTML 与它的产出契约一致——method=post、蜜罐 _hp、站点隐藏域 data-cms-site、
+             每个字段一个 label + 控件、提交按钮；提交、限流与审核由后续的动态层接管。 -->
+        <form class="form" method="post" action="/contact/" data-cms-form="inquiry">
+          <div class="form__field">
+            <label for="name">姓名 <span class="form__req">*</span></label>
+            <input type="text" id="name" name="name" placeholder="怎么称呼你" required>
+          </div>
+          <div class="form__field">
+            <label for="phone">电话 <span class="form__req">*</span></label>
+            <input type="tel" id="phone" name="phone" placeholder="手机或座机" required>
+          </div>
+          <div class="form__field">
+            <label for="email">邮箱</label>
+            <input type="email" id="email" name="email" placeholder="选填">
+          </div>
+          <div class="form__field">
+            <label for="message">留言</label>
+            <textarea id="message" name="message" rows="5" placeholder="想问什么"></textarea>
+          </div>
+          <div style="position:absolute;left:-9999px" aria-hidden="true">
+            <input type="text" name="_hp" tabindex="-1" autocomplete="off">
+          </div>
+          <input type="hidden" name="contentId" value="[field:id/]">
+          <input type="hidden" name="contentType" value="[field:typeCode/]">
+          <input type="hidden" name="contentUrl" value="[field:url/]">
+          <input type="hidden" name="siteId" value="[field:site.id/]" data-cms-site="[field:site.id/]">
+          <button type="submit">提交询价</button>
+        </form>
+      </section>
+
+      <section class="contact-content">
+        <h2 class="block-title">拜访地址</h2>
+        <div class="content">[field:content/]</div>
+      </section>
+      {/cms:detail}
+    </div>
+
+    <aside class="aside aside--narrow" aria-label="联系方式">
+      <section class="widget">
+        <h2 class="widget__title">直接联系</h2>
+        <ul class="widget__list">
+          <li class="widget__item"><span class="widget__label">电话</span><a class="widget__link" href="tel:[field:site.contactPhone/]">[field:site.contactPhone/]</a></li>
+          <li class="widget__item"><span class="widget__label">邮箱</span><a class="widget__link" href="mailto:[field:site.contactEmail/]">[field:site.contactEmail/]</a></li>
+          <li class="widget__item"><span class="widget__label">备案</span><span>[field:site.icp/]</span></li>
+        </ul>
+      </section>
+      <section class="widget">
+        <h2 class="widget__title">热门标签</h2>
+        <div class="tagcloud">
+        {cms:tagnav type='all' row='8' minCount='1' orderby='count'}
+          <a class="tagcloud__item [field:class/]" href="[field:url/]">[field:name/]<span class="tagcloud__count">[field:count/]</span></a>
+        {/cms:tagnav}
+        </div>
+      </section>
+    </aside>
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

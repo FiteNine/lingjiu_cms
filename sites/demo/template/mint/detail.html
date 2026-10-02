@@ -1,0 +1,79 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb withContent='1'}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <!-- 详情页兜底模板：只用跨类型公共字段，任何类型都能落在它上面。 -->
+  {cms:detail}
+  <article class="article">
+    <header class="article__head">
+      <p class="article__eyebrow">[field:typeName/]</p>
+      <h1 class="article__title">[field:title/]</h1>
+      <p class="article__meta">
+        <time datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+        <span class="dot" aria-hidden="true">·</span>
+        <span>[field:viewCount format='compact'/] 阅读</span>
+        <span class="dot" aria-hidden="true">·</span>
+        <span>[field:readingMinutes/] 分钟读完</span>
+        {cms:if field='commentCount'}<span class="dot" aria-hidden="true">·</span><span>[field:commentCount/] 条评论</span>{/cms:if}
+      </p>
+      {cms:if field='summary'}<p class="article__lede">[field:summary/]</p>{/cms:if}
+      {cms:if field='cover'}<figure class="article__figure"><img src="[field:cover size='large'/]" alt="[field:title/]" width="1280" height="720" loading="lazy" decoding="async"></figure>{/cms:if}
+    </header>
+
+    {cms:if field='toc'}
+    <nav class="toc" aria-label="正文目录">
+      <p class="toc__title">目录</p>
+      <ol class="toc__list">
+      {cms:foreach field='toc'}
+        <li class="toc__item toc-lv[field:level/]"><a class="toc__link" href="[field:url/]">[field:text/]</a></li>
+      {/cms:foreach}
+      </ol>
+    </nav>
+    {/cms:if}
+
+    <div class="article__body content">[field:content/]</div>
+
+    <footer class="article__foot">
+      <div class="chip-row">
+      {cms:foreach field='tags'}
+        <a class="chip" href="[field:url/]">[field:name/]</a>
+      {/cms:foreach}
+      </div>
+      <p class="article__cats">
+      {cms:foreach field='categories'}
+        <span class="meta__item">[field:name/]<span class="muted">（[field:dimension/]）</span></span>
+      {/cms:foreach}
+      </p>
+    </footer>
+
+    <!-- 上下篇写在 detail 标签体内：hasPrev / hasNext 由该标签提供（§6.3） -->
+    <nav class="prenext" aria-label="上下篇">
+      {cms:if field='hasPrev'}
+      {cms:prenext type='prev'}
+        <a class="prenext__link prenext__link--prev" data-dir="prev" rel="prev" href="[field:url/]"><span class="prenext__dir">上一篇</span><span class="prenext__title">[field:title/]</span><time class="prenext__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time></a>
+      {/cms:prenext}
+      {cms:else/}
+      <p class="prenext__hint">已经是第一篇</p>
+      {/cms:if}
+      {cms:if field='hasNext'}
+      {cms:prenext type='next'}
+        <a class="prenext__link prenext__link--next" data-dir="next" rel="next" href="[field:url/]"><span class="prenext__dir">下一篇</span><span class="prenext__title">[field:title/]</span><time class="prenext__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time></a>
+      {/cms:prenext}
+      {cms:else/}
+      <p class="prenext__hint">已经是最后一篇</p>
+      {/cms:if}
+    </nav>
+  </article>
+  {/cms:detail}
+
+</div>
+{cms:include file='footer.html'/}

@@ -1,0 +1,38 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <header class="page-head page-head--center">
+    <p class="page-head__eyebrow">关于我们 · about.html（SINGLE 类型 about）</p>
+    <h1 class="page-head__title">[field:title/]</h1>
+    {cms:if field='summary'}<p class="page-head__lede">[field:summary/]</p>{/cms:if}
+    <p class="page-head__meta">更新于 <time datetime="[field:updateTime format='iso'/]">[field:updateTime format='Y-m-d'/]</time> · 全文 [field:wordCount/] 字 · 约 [field:readingMinutes/] 分钟</p>
+  </header>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      {cms:detail}
+      <article class="article article--single">
+        <div class="article__body content">[field:content/]</div>
+      </article>
+      {/cms:detail}
+
+      <section class="section">
+        <h2 class="section__title">这个站是怎么搭起来的</h2>
+        <ol class="steps">
+          <li class="steps__item"><p class="steps__title">定义内容类型</p><p class="steps__text">article / product / book / chapter / author 五种形态，字段由后台自助定义。</p></li>
+          <li class="steps__item"><p class="steps__title">写模板</p><p class="steps__text">14 个标签加字段引用两种语法，include 片段在编译期展开。</p></li>
+          <li class="steps__item"><p class="steps__title">全站静态化</p><p class="steps__text">列表、详情、标签、归档、筛选、搜索壳、feed 一起产出到 www/。</p></li>
+        </ol>
+      </section>
+
+      <section class="section section--cta">
+        <h2 class="section__title">想聊聊？</h2>
+        <p class="section__note">电话 [field:site.contactPhone/] · 邮箱 [field:site.contactEmail/]</p>
+        <p><a class="btn btn--primary" href="/contact/">去询价表单</a></p>
+      </section>
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

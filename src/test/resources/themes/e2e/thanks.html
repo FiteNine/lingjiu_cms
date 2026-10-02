@@ -1,0 +1,11 @@
+{cms:include file='header.html'/}
+<h1 class="title">提交成功</h1>
+{cms:if field='param.form_ok'}
+  <p class="ok">感谢提交，我们会尽快联系你。</p>
+{cms:else/}
+  <p class="waiting">等待表单提交。</p>
+{/cms:if}
+{cms:query type='article' category='all' row='3' name='latest'}
+  <a href="[field:url/]">[field:title/]</a>
+{/cms:query}
+{cms:include file='footer.html'/}

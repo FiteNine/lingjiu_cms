@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.cms.mapper.CmsContentMapper">
+
+    <!--
+      静态发布引擎的取数语句（static-publish.md §6.3 / §6.4）。
+      SQL 一律写在这里（backend/AGENTS.md：Java 里不允许出现 SQL），条件由
+      com.lingjiuw.cms.module.cms.publish.provider.ProviderParams 翻译好传进来。
+
+      三条口径写死在下面，别处不许再实现一遍：
+        * 时间窗（§6.3）：PUBLISHED 隐含 publish_time <= now() 且未到期；
+          计数、邻接、归档、facet、tags 全部 include 同一个 publishWindow；
+        * 逻辑删除：XML 里的语句不会自动带 deleted = 0（backend/AGENTS.md），每条语句自己写；
+        * 排序末尾恒追加 c.id desc 兜底（§6.3 v2.2）。
+    -->
+
+    <!--
+      后台「内容管理」的写入与关联读取（C-3）。写入侧的 db 默认值兜不住的两列在这里显式处理：
+        * data / content_toc 是 jsonb——必须 ::jsonb，实体上已把这两列排除在内置 insert / update；
+        * 审计列由 Java 侧显式赋值（自定义 XML 语句不触发 MetaObjectHandler 的自动填充）。
+    -->
+
+    <insert id="insertContent">
+        <!--
+          自增 id 显式取序列回填（selectKey 在 insert 之前执行）：索引表 / 关联表的行要用它，
+          而 MyBatis 只为注解式的自定义 insert 接 useGeneratedKeys，XML 语句不会自动回填。
+        -->
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            select nextval('cms_content_id_seq')
+        </selectKey>
+        insert into cms_content (id, site_id, type_code, parent_id, slug, title, summary, cover, status,
+                                 sort, top, recommend, publish_time, expire_time, author_id, author_name,
+                                 view_count, view_count_day, view_count_week, comment_count,
+                                 rating_avg, rating_count, content_format, seo_title, seo_description,
+                                 seo_keywords, data, content, content_html, content_toc, word_count,
+                                 create_by, create_time, update_by, update_time, deleted)
+        values (#{id}, #{siteId}, #{typeCode}, #{parentId}, #{slug}, #{title}, #{summary}, #{cover}, #{status},
+                #{sort}, #{top}, #{recommend}, #{publishTime}, #{expireTime}, #{authorId}, #{authorName},
+                #{viewCount}, #{viewCountDay}, #{viewCountWeek}, #{commentCount},
+                #{ratingAvg}, #{ratingCount}, #{contentFormat}, #{seoTitle}, #{seoDescription},
+                #{seoKeywords}, #{data,jdbcType=VARCHAR}::jsonb, #{content}, #{contentHtml},
+                #{contentToc,jdbcType=VARCHAR}::jsonb, #{wordCount},
+                #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, 0)
+    </insert>
+
+    <update id="updateContent">
+        update cms_content
+           set type_code       = #{typeCode},
+               parent_id       = #{parentId},
+               slug            = #{slug},
+               title           = #{title},
+               summary         = #{summary},
+               cover           = #{cover},
+               status          = #{status},
+               sort            = #{sort},
+               top             = #{top},
+               recommend       = #{recommend},
+               publish_time    = #{publishTime},
+               expire_time     = #{expireTime},
+               author_id       = #{authorId},
+               author_name     = #{authorName},
+               content_format  = #{contentFormat},
+               seo_title       = #{seoTitle},
+               seo_description = #{seoDescription},
+               seo_keywords    = #{seoKeywords},
+               data            = #{data,jdbcType=VARCHAR}::jsonb,
+               content         = #{content},
+               content_html    = #{contentHtml},
+               content_toc     = #{contentToc,jdbcType=VARCHAR}::jsonb,
+               word_count      = #{wordCount},
+               update_by       = #{updateBy},
+               update_time     = #{updateTime}
+         where id = #{id}
+           and deleted = 0
+    </update>
+
+    <!-- 某内容的分类关联：主分类排第一（它决定 categoryUrl / 面包屑 / canonical，§2.3）。 -->
+    <select id="selectContentCategoryRefs"
+            resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$RelationRow">
+        select cc.content_id as contentId, cc.category_id as refId, cc.dimension as dimension
+          from cms_content_category cc
+         where cc.content_id = #{contentId}
+           and cc.deleted = 0
+         order by case when cc.dimension = 'primary' then 0 else 1 end, cc.id
+    </select>
+
+    <!-- 某内容的标签关联。 -->
+    <select id="selectContentTagRefs"
+            resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$RelationRow">
+        select ct.content_id as contentId, ct.tag_id as refId
+          from cms_content_tag ct
+         where ct.content_id = #{contentId}
+           and ct.deleted = 0
+         order by ct.id
+    </select>
+
+    <!-- 某类型下的内容条数：SINGLE 类型"至多一条"的保存期校验（§2.3，数据库部分索引只兜单页类型）。 -->
+    <select id="countByType" resultType="long">
+        select count(*)
+          from cms_content c
+         where c.site_id = #{siteId}
+           and c.type_code = #{typeCode}
+           and c.deleted = 0
+        <if test="excludeId != null">
+           and c.id &lt;&gt; #{excludeId}
+        </if>
+    </select>
+
+    <!--
+      时间窗（§6.3）。三种模式：
+        published —— 默认：status = 'PUBLISHED' 且未到 publish_time 的不出现、到期的退出；
+        exact     —— 指定状态（后台预览取 DRAFT / OFFLINE）；到期窗口仍然生效；
+        any       —— 草稿与定时未到点的都看得见。
+      any 与 exact 仍然保留到期窗口：§2.3 v2.2 明写"查询恒带 expire_time is null or > now()"，
+      而"到期内容即便 status='any' 也不出现"与 TestContentProvider 的口径一致。
+    -->
+    <sql id="publishWindow">
+        <choose>
+            <when test='p.statusMode == "published"'>
+                and c.status = 'PUBLISHED'
+                and (c.publish_time is null or c.publish_time &lt;= now())
+                and (c.expire_time is null or c.expire_time &gt; now())
+            </when>
+            <when test='p.statusMode == "exact"'>
+                and c.status = #{p.statusValue}
+                and (c.expire_time is null or c.expire_time &gt; now())
+            </when>
+            <otherwise>
+                and (c.expire_time is null or c.expire_time &gt; now())
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!-- 类型条件：跨类型（type='all'）时不许出现 type_code（§6.3 v2.2）。 -->
+    <sql id="typeFilter">
+        <if test="!p.typeAll and p.typeCode != null">
+            and c.type_code = #{p.typeCode}
+        </if>
+    </sql>
+
+    <!-- 栏目条件：java 侧已经把"id 或 slug"与"含子分类"展开成 id 集合；空集合 = 一条都不匹配。 -->
+    <sql id="categoryFilter">
+        <if test="p.categoryIds != null">
+            <choose>
+                <when test="p.categoryIds.isEmpty()">
+                    and 1 = 0
+                </when>
+                <otherwise>
+                    and exists (select 1 from cms_content_category cc
+                                 where cc.content_id = c.id
+                                   and cc.deleted = 0
+                                   and cc.category_id in
+                                   <foreach collection="p.categoryIds" item="cid" open="(" separator="," close=")">
+                                       #{cid}
+                                   </foreach>)
+                </otherwise>
+            </choose>
+        </if>
+    </sql>
+
+    <!--
+      共用过滤条件。列表、计数、邻接全部 include 它，因此"计数与列表同口径"（§6.3）
+      在 SQL 层面只有一份实现——这也是接口注释里那条承重口径的落点。
+    -->
+    <sql id="predicate">
+        <include refid="publishWindow"/>
+        <include refid="typeFilter"/>
+        <include refid="categoryFilter"/>
+        <!-- tag 多值之间是 AND：每个标签各来一个 exists（§6.3） -->
+        <if test="p.tagFilterActive">
+            <choose>
+                <when test="p.tagMissing or p.tagIds == null or p.tagIds.isEmpty()">
+                    and 1 = 0
+                </when>
+                <otherwise>
+                    <foreach collection="p.tagIds" item="tid">
+                        and exists (select 1 from cms_content_tag ct
+                                     where ct.content_id = c.id
+                                       and ct.deleted = 0
+                                       and ct.tag_id = #{tid})
+                    </foreach>
+                </otherwise>
+            </choose>
+        </if>
+        <if test="p.authorMissing">
+            and 1 = 0
+        </if>
+        <if test="p.authorId != null">
+            and c.author_id = #{p.authorId}
+        </if>
+        <if test="p.keyword != null and p.keyword != ''">
+            and c.title ilike '%' || #{p.keyword} || '%'
+        </if>
+        <if test="p.top != null">
+            and c.top =
+            <choose>
+                <when test="p.top">1</when>
+                <otherwise>0</otherwise>
+            </choose>
+        </if>
+        <if test="p.recommend != null">
+            and c.recommend =
+            <choose>
+                <when test="p.recommend">1</when>
+                <otherwise>0</otherwise>
+            </choose>
+        </if>
+        <!-- of='self'：锚定项的子内容；of='parent'：锚定项的父的子内容（0 = 顶级，§6.3） -->
+        <if test='p.of == "self"'>
+            and c.parent_id = #{p.anchorId}
+        </if>
+        <if test='p.of == "parent"'>
+            and c.parent_id = #{p.anchorParentId}
+        </if>
+        <if test="p.excludeSelf and p.anchorId &gt; 0">
+            and c.id &lt;&gt; #{p.anchorId}
+        </if>
+        <!-- relate='tag' / 'category'：与锚定项共享至少一个标签 / 分类 -->
+        <if test='p.relate == "tag"'>
+            and exists (select 1 from cms_content_tag ct
+                         where ct.content_id = c.id
+                           and ct.deleted = 0
+                           and exists (select 1 from cms_content_tag a
+                                        where a.content_id = #{p.anchorId}
+                                          and a.deleted = 0
+                                          and a.tag_id = ct.tag_id))
+        </if>
+        <if test='p.relate == "category"'>
+            and exists (select 1 from cms_content_category cc
+                         where cc.content_id = c.id
+                           and cc.deleted = 0
+                           and exists (select 1 from cms_content_category ac
+                                        where ac.content_id = #{p.anchorId}
+                                          and ac.deleted = 0
+                                          and ac.category_id = cc.category_id))
+        </if>
+        <!--
+          relate='field:<code>'：两个方向都认（§6.3 没有规定关系写在哪一侧，
+          锚定项数组里有本行 id，或本行数组里有锚定项 id，都算相关）。
+          jsonb 数组元素可能是数字也可能是字符串，因此按文本比较。
+        -->
+        <if test="p.relateField != null">
+            and (
+                exists (select 1 from cms_content a
+                         where a.id = #{p.anchorId}
+                           and a.deleted = 0
+                           and jsonb_typeof(a.data -&gt; #{p.relateField}::text) = 'array'
+                           and exists (select 1
+                                         from jsonb_array_elements_text(a.data -&gt; #{p.relateField}::text) e
+                                        where e.value = c.id::text))
+                or
+                (jsonb_typeof(c.data -&gt; #{p.relateField}::text) = 'array'
+                 and exists (select 1
+                               from jsonb_array_elements_text(c.data -&gt; #{p.relateField}::text) e
+                              where e.value = #{p.anchorId}::text))
+            )
+        </if>
+        <!-- where 的每个条件都是 AND（§2.5：没有 OR） -->
+        <foreach collection="p.conditions" item="w">
+            <include refid="whereCondition"/>
+        </foreach>
+    </sql>
+
+    <!-- 一个 where 条件：先按"字段落在哪里"分派，再按运算符分派。 -->
+    <sql id="whereCondition">
+        <choose>
+            <when test='w.kind == "category"'>
+                <choose>
+                    <when test='w.op == "ne"'>
+                        and not exists (select 1 from cms_content_category wc
+                                         where wc.content_id = c.id
+                                           and wc.deleted = 0
+                                           and wc.category_id in
+                                           <foreach collection="w.values" item="v" open="(" separator="," close=")">
+                                               cast(#{v} as bigint)
+                                           </foreach>)
+                    </when>
+                    <otherwise>
+                        and exists (select 1 from cms_content_category wc
+                                     where wc.content_id = c.id
+                                       and wc.deleted = 0
+                                       and wc.category_id in
+                                       <foreach collection="w.values" item="v" open="(" separator="," close=")">
+                                           cast(#{v} as bigint)
+                                       </foreach>)
+                    </otherwise>
+                </choose>
+            </when>
+            <when test='w.kind == "tag"'>
+                <choose>
+                    <when test='w.op == "ne"'>
+                        and not exists (select 1 from cms_content_tag wt
+                                         where wt.content_id = c.id
+                                           and wt.deleted = 0
+                                           and wt.tag_id in
+                                           <foreach collection="w.values" item="v" open="(" separator="," close=")">
+                                               cast(#{v} as bigint)
+                                           </foreach>)
+                    </when>
+                    <otherwise>
+                        and exists (select 1 from cms_content_tag wt
+                                     where wt.content_id = c.id
+                                       and wt.deleted = 0
+                                       and wt.tag_id in
+                                       <foreach collection="w.values" item="v" open="(" separator="," close=")">
+                                           cast(#{v} as bigint)
+                                       </foreach>)
+                    </otherwise>
+                </choose>
+            </when>
+            <when test='w.kind == "custom"'>
+                <choose>
+                    <when test='w.op == "like"'>
+                        and exists (select 1 from cms_content_index ix
+                                     where ix.site_id = #{p.siteId}
+                                       and ix.content_id = c.id
+                                       and ix.deleted = 0
+                                       and ix.field_code = #{w.fieldCode}
+                                       and ix.str_value ilike '%' || #{w.first} || '%')
+                    </when>
+                    <when test='w.op == "in"'>
+                        and exists (select 1 from cms_content_index ix
+                                     where ix.site_id = #{p.siteId}
+                                       and ix.content_id = c.id
+                                       and ix.deleted = 0
+                                       and ix.field_code = #{w.fieldCode}
+                                       and ix.value_key in
+                                       <foreach collection="w.values" item="v" open="(" separator="," close=")">
+                                           #{v}
+                                       </foreach>)
+                    </when>
+                    <when test='w.op == "has"'>
+                        and exists (select 1 from cms_content_index ix
+                                     where ix.site_id = #{p.siteId}
+                                       and ix.content_id = c.id
+                                       and ix.deleted = 0
+                                       and ix.field_code = #{w.fieldCode}
+                                       and ix.value_key = #{w.first})
+                    </when>
+                    <when test='w.op == "ne"'>
+                        <!-- 字段根本没有时不成立（"说不清就不匹配"，与 TestContentProvider 一致） -->
+                        and exists (select 1 from cms_content_index ix
+                                     where ix.site_id = #{p.siteId}
+                                       and ix.content_id = c.id
+                                       and ix.deleted = 0
+                                       and ix.field_code = #{w.fieldCode})
+                        and not exists (select 1 from cms_content_index ix
+                                         where ix.site_id = #{p.siteId}
+                                           and ix.content_id = c.id
+                                           and ix.deleted = 0
+                                           and ix.field_code = #{w.fieldCode}
+                                           and <include refid="customCompare"/>)
+                    </when>
+                    <otherwise>
+                        and exists (select 1 from cms_content_index ix
+                                     where ix.site_id = #{p.siteId}
+                                       and ix.content_id = c.id
+                                       and ix.deleted = 0
+                                       and ix.field_code = #{w.fieldCode}
+                                       and <include refid="customCompare"/>)
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                <!-- 内置列：文本按文本比，数字 / 时间按强类型比（值都是模板字面量，一律先 cast） -->
+                <choose>
+                    <when test='w.op == "like"'>
+                        and <include refid="builtinColumn"/> ilike '%' || #{w.first} || '%'
+                    </when>
+                    <when test='w.op == "in"'>
+                        and <include refid="builtinColumn"/>::text in
+                        <foreach collection="w.values" item="v" open="(" separator="," close=")">
+                            #{v}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and <include refid="builtinColumn"/> <include refid="opSymbol"/> cast(#{w.first} as <include refid="builtinCast"/>)
+                    </otherwise>
+                </choose>
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!-- 自定义字段（indexed=1）比的是索引表的哪一列；值按"数字 / 时间 / 文本"归类（§2.5）。 -->
+    <sql id="customCompare">
+        <choose>
+            <when test='w.valueKind == "num"'>
+                ix.num_value <include refid="opSymbol"/> cast(#{w.first} as numeric)
+            </when>
+            <when test='w.valueKind == "time"'>
+                ix.time_value <include refid="opSymbol"/> cast(#{w.first} as timestamp)
+            </when>
+            <otherwise>
+                ix.str_value <include refid="opSymbol"/> #{w.first}
+            </otherwise>
+        </choose>
+    </sql>
+
+    <sql id="opSymbol">
+        <choose>
+            <when test='w.op == "eq"'>=</when>
+            <when test='w.op == "ne"'>&lt;&gt;</when>
+            <when test='w.op == "gt"'>&gt;</when>
+            <when test='w.op == "gte"'>&gt;=</when>
+            <when test='w.op == "lt"'>&lt;</when>
+            <otherwise>&lt;=</otherwise>
+        </choose>
+    </sql>
+
+    <!-- where 白名单（§2.2）里的内置列，值一律用 id / 字面量。 -->
+    <sql id="builtinColumn">
+        <choose>
+            <when test='w.fieldCode == "id"'>c.id</when>
+            <when test='w.fieldCode == "slug"'>c.slug</when>
+            <when test='w.fieldCode == "typeCode"'>c.type_code</when>
+            <when test='w.fieldCode == "status"'>c.status</when>
+            <when test='w.fieldCode == "publishTime"'>c.publish_time</when>
+            <when test='w.fieldCode == "expireTime"'>c.expire_time</when>
+            <when test='w.fieldCode == "updateTime"'>c.update_time</when>
+            <when test='w.fieldCode == "sort"'>c.sort</when>
+            <when test='w.fieldCode == "top"'>c.top</when>
+            <when test='w.fieldCode == "recommend"'>c.recommend</when>
+            <when test='w.fieldCode == "authorId"'>c.author_id</when>
+            <when test='w.fieldCode == "parentId"'>c.parent_id</when>
+            <when test='w.fieldCode == "viewCount"'>c.view_count</when>
+            <when test='w.fieldCode == "viewCountDay"'>c.view_count_day</when>
+            <when test='w.fieldCode == "viewCountWeek"'>c.view_count_week</when>
+            <when test='w.fieldCode == "commentCount"'>c.comment_count</when>
+            <when test='w.fieldCode == "wordCount"'>c.word_count</when>
+            <otherwise>c.id</otherwise>
+        </choose>
+    </sql>
+
+    <sql id="builtinCast">
+        <choose>
+            <when test='w.kind == "text"'>text</when>
+            <when test='w.kind == "time"'>timestamp</when>
+            <otherwise>numeric</otherwise>
+        </choose>
+    </sql>
+
+    <!--
+      排序（§6.3）：每项都是"内置列"或"indexed 自定义字段的索引行"，末尾恒追加 id desc 兜底。
+      relationOrder 优先（按锚定项 RELATION 数组里的位置，数组里没有的排最后）。
+    -->
+    <sql id="orderItems">
+        <if test="p.relationOrder">
+            (select array_position(
+                        array(select jsonb_array_elements_text(
+                                         case when jsonb_typeof(x.data -&gt; #{p.relateField}::text) = 'array'
+                                              then x.data -&gt; #{p.relateField}::text
+                                              else '[]'::jsonb end)),
+                        c.id::text)
+               from cms_content x
+              where x.id = #{p.anchorId}
+                and x.deleted = 0) asc nulls last,
+        </if>
+        <foreach collection="p.order" item="o" separator=",">
+            <choose>
+                <when test='o.kind == "custom"'>
+                    <choose>
+                        <when test='o.valueKind == "num"'>
+                            (select ix.num_value from cms_content_index ix
+                              where ix.site_id = #{p.siteId} and ix.content_id = c.id
+                                and ix.deleted = 0 and ix.field_code = #{o.fieldCode}
+                                and ix.num_value is not null limit 1)
+                        </when>
+                        <when test='o.valueKind == "time"'>
+                            (select ix.time_value from cms_content_index ix
+                              where ix.site_id = #{p.siteId} and ix.content_id = c.id
+                                and ix.deleted = 0 and ix.field_code = #{o.fieldCode}
+                                and ix.time_value is not null limit 1)
+                        </when>
+                        <otherwise>
+                            (select ix.str_value from cms_content_index ix
+                              where ix.site_id = #{p.siteId} and ix.content_id = c.id
+                                and ix.deleted = 0 and ix.field_code = #{o.fieldCode}
+                                and ix.str_value is not null limit 1)
+                        </otherwise>
+                    </choose>
+                </when>
+                <otherwise>
+                    <include refid="orderColumn"/>
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="o.desc">desc nulls last</when>
+                <otherwise>asc nulls last</otherwise>
+            </choose>
+        </foreach>
+        <if test="p.order != null and !p.order.isEmpty()">,</if>
+        c.id desc
+    </sql>
+
+    <sql id="orderColumn">
+        <choose>
+            <when test='o.fieldCode == "publishTime"'>c.publish_time</when>
+            <when test='o.fieldCode == "updateTime"'>c.update_time</when>
+            <when test='o.fieldCode == "sort"'>c.sort</when>
+            <when test='o.fieldCode == "viewCount"'>c.view_count</when>
+            <when test='o.fieldCode == "viewCountDay"'>c.view_count_day</when>
+            <when test='o.fieldCode == "viewCountWeek"'>c.view_count_week</when>
+            <when test='o.fieldCode == "commentCount"'>c.comment_count</when>
+            <when test='o.fieldCode == "wordCount"'>c.word_count</when>
+            <when test='o.fieldCode == "id"'>c.id</when>
+            <when test='o.fieldCode == "top"'>c.top</when>
+            <when test='o.fieldCode == "recommend"'>c.recommend</when>
+            <otherwise>c.id</otherwise>
+        </choose>
+    </sql>
+
+    <!-- 当页的行（列表 / 详情 / 邻接都用同一份过滤条件）。 -->
+    <select id="selectPublishRows" resultType="com.lingjiuw.cms.module.cms.publish.provider.ContentRow">
+        select c.*
+          from cms_content c
+         where c.site_id = #{p.siteId}
+           and c.deleted = 0
+           <include refid="predicate"/>
+         order by <include refid="orderItems"/>
+        <if test="p.limit &gt; 0">
+            limit #{p.limit} offset #{p.offset}
+        </if>
+    </select>
+
+    <!-- 与列表完全同一份谓词的计数（§6.3："一切计数同口径"）。 -->
+    <select id="countPublishRows" resultType="long">
+        select count(*)
+          from cms_content c
+         where c.site_id = #{p.siteId}
+           and c.deleted = 0
+           <include refid="predicate"/>
+    </select>
+
+    <!-- 上一篇：排序序列里紧挨着锚定项之前的那一条（§6.4）。 -->
+    <select id="selectPrevNeighbor" resultType="com.lingjiuw.cms.module.cms.publish.provider.ContentRow">
+        with ordered as (
+            select c.id as rid,
+                   row_number() over (order by <include refid="orderItems"/>) as rn
+              from cms_content c
+             where c.site_id = #{p.siteId}
+               and c.deleted = 0
+               <include refid="predicate"/>
+        )
+        select c.*
+          from cms_content c
+         where c.id = (select o.rid
+                         from ordered o
+                        where o.rn = (select x.rn from ordered x where x.rid = #{p.anchorId}) - 1)
+    </select>
+
+    <!-- 下一篇：排序序列里紧挨着锚定项之后的那一条。 -->
+    <select id="selectNextNeighbor" resultType="com.lingjiuw.cms.module.cms.publish.provider.ContentRow">
+        with ordered as (
+            select c.id as rid,
+                   row_number() over (order by <include refid="orderItems"/>) as rn
+              from cms_content c
+             where c.site_id = #{p.siteId}
+               and c.deleted = 0
+               <include refid="predicate"/>
+        )
+        select c.*
+          from cms_content c
+         where c.id = (select o.rid
+                         from ordered o
+                        where o.rn = (select x.rn from ordered x where x.rid = #{p.anchorId}) + 1)
+    </select>
+
+    <!--
+      层级后代（{@code children} 与 query 的 depth>1 预加载）：
+      扁平返回 depth 层以内的全部后代，按 sort asc, id asc（§6.4 的目录树顺序）。
+    -->
+    <select id="selectDescendants" resultType="com.lingjiuw.cms.module.cms.publish.provider.ContentRow">
+        with recursive tree as (
+            select c.id, 1 as lvl
+              from cms_content c
+             where c.site_id = #{p.siteId}
+               and c.deleted = 0
+               and c.parent_id in
+               <foreach collection="p.parentIds" item="pid" open="(" separator="," close=")">
+                   #{pid}
+               </foreach>
+               <include refid="publishWindow"/>
+               <include refid="typeFilter"/>
+            union all
+            select c.id, t.lvl + 1
+              from cms_content c
+              join tree t on c.parent_id = t.id
+             where t.lvl &lt; #{p.depth}
+               and c.site_id = #{p.siteId}
+               and c.deleted = 0
+               <include refid="publishWindow"/>
+               <include refid="typeFilter"/>
+        )
+        select c.*
+          from cms_content c
+          join tree t on t.id = c.id
+         order by c.sort asc, c.id asc
+    </select>
+
+    <!--
+      内容自身的祖先链：自下而上自连接，输出顺序反转成"从顶到下"（面包屑用，§6.4）。
+      祖先行（递归分支，也就是最终返回的那些行）套用与列表相同的发布口径（§2.3 v2.2：
+      查询恒带 publish_time &lt;= now() 且 expire_time is null or &gt; now()），否则一条 DRAFT /
+      OFFLINE / 已到期的祖先会带着标题出现在已发布页面的面包屑里。
+      锚点分支（第 1 段）不过滤：它是"从哪一条往上走"，不是输出行；过滤它会让后台预览
+      DRAFT 内容时整条面包屑消失。本语句没有 ProviderParams，不能 include publishWindow
+      （那个片段引用 p.* 与别名 c），所以这里内联写。
+    -->
+    <select id="selectContentAncestors" resultType="com.lingjiuw.cms.module.cms.publish.provider.ContentRow">
+        with recursive chain as (
+            select c.id, c.parent_id, 1 as lvl
+              from cms_content c
+             where c.id = #{contentId}
+               and c.site_id = #{siteId}
+               and c.deleted = 0
+            union all
+            select p.id, p.parent_id, ch.lvl + 1
+              from cms_content p
+              join chain ch on p.id = ch.parent_id
+             where ch.parent_id &gt; 0
+               and p.site_id = #{siteId}
+               and p.deleted = 0
+               and p.status = 'PUBLISHED'
+               and (p.publish_time is null or p.publish_time &lt;= now())
+               and (p.expire_time is null or p.expire_time &gt; now())
+        )
+        select c.*
+          from cms_content c
+          join chain ch on ch.id = c.id
+         where c.id &lt;&gt; #{contentId}
+         order by ch.lvl desc
+    </select>
+
+    <!-- 每个父内容下的直接子内容数（childCount / hasChildren 派生字段）。 -->
+    <select id="selectChildCounts" resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$ChildCountRow">
+        select c.parent_id as parentId, count(*) as count
+          from cms_content c
+         where c.site_id = #{p.siteId}
+           and c.deleted = 0
+           and c.parent_id in
+           <foreach collection="p.parentIds" item="pid" open="(" separator="," close=")">
+               #{pid}
+           </foreach>
+           <include refid="publishWindow"/>
+           <include refid="typeFilter"/>
+         group by c.parent_id
+    </select>
+
+    <!-- 每个类型下已发布内容的条数（channel source='type' 的 count，§6.4）。 -->
+    <select id="selectTypeCounts" resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$TypeCountRow">
+        select c.type_code as typeCode, count(*) as count
+          from cms_content c
+         where c.site_id = #{p.siteId}
+           and c.deleted = 0
+           <include refid="publishWindow"/>
+         group by c.type_code
+    </select>
+
+    <!-- 年 / 月归档分组（§6.4）：计数与列表同一个时间窗。 -->
+    <select id="selectArchiveCounts" resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$ArchiveCountRow">
+        select extract(year from date_trunc(#{mode}::text, c.publish_time))::int as year,
+               extract(month from date_trunc(#{mode}::text, c.publish_time))::int as month,
+               count(*) as count
+          from cms_content c
+         where c.site_id = #{p.siteId}
+           and c.deleted = 0
+           and c.publish_time is not null
+           <include refid="publishWindow"/>
+           <include refid="typeFilter"/>
+           <include refid="categoryFilter"/>
+         group by 1, 2
+         order by 1 desc, 2 desc
+        <if test="p.limit &gt; 0">
+            limit #{p.limit}
+        </if>
+    </select>
+
+    <!-- facet 取值条（§7.4）：只数已发布的内容，value_key='default' 的标量取值回退到 str_value。 -->
+    <select id="selectFacetCounts" resultType="com.lingjiuw.cms.module.cms.publish.provider.Rows$FacetCountRow">
+        select case when ix.value_key = 'default'
+                    then coalesce(ix.str_value, ix.value_key)
+                    else ix.value_key end as value,
+               count(*) as count
+          from cms_content_index ix
+          join cms_content c on c.id = ix.content_id
+         where ix.site_id = #{p.siteId}
+           and ix.deleted = 0
+           and ix.field_code = #{fieldCode}
+           and c.site_id = #{p.siteId}
+           and c.deleted = 0
+           <include refid="publishWindow"/>
+           <include refid="typeFilter"/>
+         group by 1
+         order by count(*) desc, 1 asc
+        <if test="limit &gt; 0">
+            limit #{limit}
+        </if>
+    </select>
+    <!--
+      公开接口 /api/public/articles 的可选过滤条件（§9.2：保留给上一代表现层与第三方对接）。
+      deleted = 0 写在每条语句自己身上（backend/AGENTS.md：XML 语句不自动带逻辑删除；片段里
+      带条件会让 SqlPredicateTest 的文本检查看不到它）。
+    -->
+    <sql id="publicArticleFilter">
+        <if test="categoryId != null">
+            and exists (select 1 from cms_content_category cc
+                         where cc.content_id = c.id
+                           and cc.category_id = #{categoryId}
+                           and cc.deleted = 0)
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and c.title like concat('%', #{keyword}, '%')
+        </if>
+    </sql>
+
+    <!-- 一页文章（置顶优先，与旧 cms_article 的排序一致）。口径与发布引擎刻意不同：
+         只看 status = 'PUBLISHED'，**不看** publish_time 时间窗，避免这次合并顺手改了对外可见的可见性。 -->
+    <select id="selectPublicArticleRows" resultType="com.lingjiuw.cms.module.cms.entity.CmsContent">
+        select c.*
+          from cms_content c
+         where c.site_id = #{siteId}
+           and c.type_code = 'article'
+           and c.status = 'PUBLISHED'
+           and c.deleted = 0
+           <include refid="publicArticleFilter"/>
+         order by c.top desc, c.publish_time desc, c.id desc
+         limit #{size} offset #{offset}
+    </select>
+
+    <!-- 与 selectPublicArticleRows 完全同一份谓词的计数。 -->
+    <select id="countPublicArticleRows" resultType="long">
+        select count(*)
+          from cms_content c
+         where c.site_id = #{siteId}
+           and c.type_code = 'article'
+           and c.status = 'PUBLISHED'
+           and c.deleted = 0
+           <include refid="publicArticleFilter"/>
+    </select>
+
+    <!--
+      公开详情接口的浏览量自增。§12.4 第 14 条要求去掉这个读副作用（改走 §9.4 的
+      POST /api/public/views/...），但那条接口尚未实现——本轮只做文章并入通用内容，
+      如实保留同一行为，不顺手改掉对外接口的语义。
+    -->
+    <update id="increaseViewCount">
+        update cms_content set view_count = view_count + 1 where id = #{id} and deleted = 0
+    </update>
+
+</mapper>

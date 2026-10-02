@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /search/
+Disallow: /f/
+Crawl-delay: 1
+
+Sitemap: [field:site.url/]/sitemap.xml

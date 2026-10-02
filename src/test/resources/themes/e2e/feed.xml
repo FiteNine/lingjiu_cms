@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 主题自带的 feed 模板（§7.3 第（4）条）：本期的聚合产物由 SiteOutputs.writeFeed() 内置生成，
+     这个文件不会被读取；放在这里是为了让主题目录符合 §7.3 的完整清单。 -->
+<rss version="2.0">
+<channel>
+  <title>[field:site.name/]</title>
+</channel>
+</rss>

@@ -1,0 +1,13 @@
+{cms:include file='header.html'/}
+<nav class="breadcrumb">
+{cms:breadcrumb}
+  <a class="[field:class/]" href="[field:url/]">[field:name/]</a>
+{/cms:breadcrumb}
+</nav>
+<article class="single">
+{cms:detail}
+  <h1 class="title">[field:title/]</h1>
+  <div class="content">[field:content/]</div>
+{/cms:detail}
+</article>
+{cms:include file='footer.html'/}

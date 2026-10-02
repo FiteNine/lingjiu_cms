@@ -1,0 +1,25 @@
+<!-- 通用内容卡片：被多个列表模板 include，size='big' / 'compact' 通过 include 字面量参数传入。
+     只使用"跨类型公共字段"，因此在 type='all' 的列表里也能编译通过（§6.3）。 -->
+<article class="card card--[field:param.size/] [field:class/]">
+  <a class="card__figure" href="[field:url/]" tabindex="-1" aria-hidden="true">
+  {cms:if field='cover'}
+    <img class="card__img" src="[field:cover size='thumb'/]" alt="[field:title/]" width="320" height="200" loading="lazy" decoding="async">
+  {cms:else/}
+    <span class="card__img card__img--blank">灵</span>
+  {/cms:if}
+  </a>
+  <div class="card__body">
+    <p class="card__eyebrow">
+      <span class="card__type">[field:typeName/]</span>
+      {cms:if field='top'}<span class="badge badge--top">置顶</span>{/cms:if}
+      {cms:if field='recommend'}<span class="badge badge--recommend">推荐</span>{/cms:if}
+    </p>
+    <h3 class="card__title"><a class="card__link" href="[field:url/]">[field:title/]</a></h3>
+    <p class="card__summary">[field:summary maxlen='52'/]</p>
+    <p class="card__meta">
+      <time class="card__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span class="card__views">[field:viewCount format='compact'/] 阅读</span>
+    </p>
+  </div>
+</article>

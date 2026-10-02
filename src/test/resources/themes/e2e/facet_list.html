@@ -1,0 +1,20 @@
+{cms:include file='header.html'/}
+<nav class="breadcrumb">
+{cms:breadcrumb}
+  <a class="[field:class/]" href="[field:url/]">[field:name/]</a>
+{/cms:breadcrumb}
+</nav>
+<h1 class="channel-title">筛选：[field:channel.label/]</h1>
+<ul class="facet-nav">
+{cms:channel source='facet' type='article' field='level'}
+  <li class="facet [field:class/]"><a href="[field:urlWith/]">[field:label/]</a> <span class="count">[field:count/]</span></li>
+{/cms:channel}
+</ul>
+<ul class="news">
+{cms:list type='article' category='all' where='level:in:basic' row='20'}
+  <li class="card [field:class/]">
+    <a href="[field:url/]">[field:title/]</a>
+  </li>
+{/cms:list}
+</ul>
+{cms:include file='footer.html'/}

@@ -1,0 +1,53 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <!-- 404 页只有 site 作用域与当前页信息：没有 channel，也没有 breadcrumb（§5.1、§6.7）。
+       nginx 侧 error_page 404 /404.html。 -->
+  <section class="notfound">
+    <p class="notfound__code">404</p>
+    <h1 class="notfound__title">这个地址没有内容</h1>
+    <p class="notfound__hint">也许它改过 slug，也许它从来没存在过。搜一下，或者从下面挑一个入口。</p>
+
+    <form class="search-form" action="/search/" method="get" role="search" data-cms-search>
+      <label class="sr-only" for="nf-q">搜索关键词</label>
+      <input class="search-form__input" id="nf-q" type="search" name="q" placeholder="搜索…" autocomplete="off">
+      <button class="search-form__btn btn btn--primary" type="submit">搜索</button>
+    </form>
+
+    <p class="notfound__links">
+      <a href="/">首页</a>
+      <a href="/news/">新闻</a>
+      <a href="/product/">产品</a>
+      <a href="/book/">书籍</a>
+      <a href="/tags/">标签</a>
+      <a href="/archive/">归档</a>
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">最近更新的内容</h2>
+      <p class="section__note">404 上也可以有 query：显式给 type 与 category（§6.3）</p>
+    </div>
+    <ol class="feed-list">
+    {cms:query type='all' category='all' row='6' orderby='publishTime desc'}
+      <li class="feed-list__item [field:class/]">
+        <time class="feed-list__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+        <a class="feed-list__link" href="[field:url/]">[field:title/]</a>
+        <span class="feed-list__type">[field:typeName/]</span>
+      </li>
+    {/cms:query}
+    </ol>
+  </section>
+
+  <section class="section section--cta">
+    <h2 class="section__title">热门标签</h2>
+    <div class="chip-row">
+    {cms:tagnav type='all' row='12' minCount='1' orderby='count'}
+      <a class="chip [field:class/]" href="[field:url/]">[field:name/]<span class="chip__count">[field:count/]</span></a>
+    {/cms:tagnav}
+    </div>
+  </section>
+
+</div>
+{cms:include file='footer.html'/}

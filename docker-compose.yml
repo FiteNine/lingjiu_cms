@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: lingjiuw-cms-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lingjiuw_cms
+      POSTGRES_USER: cms
+      POSTGRES_PASSWORD: cms123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cms -d lingjiuw_cms"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  pgdata:

@@ -1,0 +1,6 @@
+/* e2e fixture theme stylesheet */
+body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 960px; }
+.site-header { border-bottom: 1px solid #ddd; padding: 1rem 0; }
+.card { list-style: none; padding: .5rem 0; }
+.pager a.current { font-weight: 700; }
+.tag-cloud .tag { display: inline-block; margin-right: .5rem; }

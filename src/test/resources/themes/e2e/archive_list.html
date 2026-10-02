@@ -1,0 +1,21 @@
+{cms:include file='header.html'/}
+<nav class="breadcrumb">
+{cms:breadcrumb}
+  <a class="[field:class/]" href="[field:url/]">[field:name/]</a>
+{/cms:breadcrumb}
+</nav>
+<h1 class="channel-title">归档：[field:channel.label/]</h1>
+<ul class="archive-nav">
+{cms:archive type='article' mode='month' row='12'}
+  <li class="archive [field:class/]"><a href="[field:url/]">[field:label/]</a></li>
+{/cms:archive}
+</ul>
+<ul class="news">
+{cms:list type='all' category='all' row='20'}
+  <li class="card [field:class/]">
+    <a href="[field:url/]">[field:title/]</a>
+    <time>[field:publishTime format='Y-m-d'/]</time>
+  </li>
+{/cms:list}
+</ul>
+{cms:include file='footer.html'/}

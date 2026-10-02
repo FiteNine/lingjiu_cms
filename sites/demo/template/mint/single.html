@@ -1,0 +1,35 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <!-- 单页兜底模板：SINGLE 页面上 detail 标签只是"显式取出当前条目"，不是分页主体（§4.5）。
+       当前条目已在匿名栈底，所以不写 detail 也能直接输出字段。 -->
+  <article class="single">
+  {cms:detail}
+    <header class="single__head">
+      <p class="single__eyebrow">[field:typeName/]</p>
+      <h1 class="single__title">[field:title/]</h1>
+      <p class="single__meta">
+        <time datetime="[field:updateTime format='iso'/]">更新于 [field:updateTime format='Y-m-d'/]</time>
+        <span class="dot" aria-hidden="true">·</span>
+        <span>[field:wordCount/] 字</span>
+      </p>
+      {cms:if field='summary'}<p class="single__lede">[field:summary/]</p>{/cms:if}
+    </header>
+    <div class="single__body content">[field:content/]</div>
+  {/cms:detail}
+    <footer class="single__foot">
+      <p class="muted">有问题？<a href="/contact/">联系我们</a> · <a href="/about/">关于本站</a> · <a href="/">返回首页</a></p>
+    </footer>
+  </article>
+
+  <section class="section section--cta">
+    <h2 class="section__title">随便逛逛</h2>
+    <div class="chip-row">
+    {cms:tagnav type='all' row='10' minCount='1' orderby='count'}
+      <a class="chip [field:class/]" href="[field:url/]">[field:name/]<span class="chip__count">[field:count/]</span></a>
+    {/cms:tagnav}
+    </div>
+  </section>
+
+</div>
+{cms:include file='footer.html'/}

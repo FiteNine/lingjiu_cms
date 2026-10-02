@@ -1,0 +1,16 @@
+</main>
+<footer class="site-footer">
+  <p class="copyright">[field:site.year/] [field:site.name/]</p>
+  <nav class="category-nav">
+  {cms:channel source='category' depth='1'}
+    <a class="[field:class/]" href="[field:url/]">[field:label/] ([field:count/])</a>
+  {/cms:channel}
+  </nav>
+  {cms:if field='site.icp'}
+    <p class="icp">[field:site.icp/]</p>
+  {cms:else/}
+    <p class="icp">未配置备案信息</p>
+  {/cms:if}
+</footer>
+</body>
+</html>

@@ -1,0 +1,169 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+      {cms:detail}
+      <article class="product">
+        <header class="product__head">
+          <p class="product__eyebrow">
+            <span class="badge">[field:brand format='label'/]</span>
+            {cms:if field='featured'}<span class="badge badge--recommend">主推</span>{/cms:if}
+            <span class="badge badge--ghost">[field:region format='label'/]</span>
+          </p>
+          <h1 class="product__title">[field:title/]</h1>
+          <p class="product__meta">
+            <time datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/]</time>
+            <span class="dot" aria-hidden="true">·</span>
+            <span>[field:viewCount format='compact'/] 次浏览</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span>[field:commentCount/] 条询价留言</span>
+          </p>
+          <div class="product__buy">
+            <p class="price price--big">[field:price money='1' symbol='¥'/]</p>
+            <p class="stock">
+            {cms:if field='stock'}<span class="stock__ok">现货 [field:stock/] 件</span>{cms:else/}<span class="stock__out">暂时缺货</span>{/cms:if}
+            </p>
+          </div>
+          {cms:if field='summary'}<p class="product__lede">[field:summary/]</p>{/cms:if}
+        </header>
+
+        {cms:if field='cover'}
+        <figure class="product__figure"><img src="[field:cover size='medium'/]" alt="[field:title/]" width="768" height="432" loading="lazy" decoding="async"></figure>
+        {/cms:if}
+
+        {cms:if field='gallery'}
+        <section class="gallery-block">
+          <h2 class="block-title">产品图集</h2>
+          <div class="gallery">
+          {cms:foreach field='gallery'}
+            <figure class="gallery__item">
+              <img class="gallery__img" src="[field:url/]" alt="[field:alt/]" width="[field:width/]" height="[field:height/]" loading="lazy" decoding="async">
+              <figcaption class="gallery__cap">[field:title/]</figcaption>
+            </figure>
+          {/cms:foreach}
+          </div>
+        </section>
+        {/cms:if}
+
+        {cms:if field='specs'}
+        <section class="specs-block">
+          <h2 class="block-title">规格参数</h2>
+          <table class="specs">
+            <caption class="sr-only">[field:title/] 的规格参数</caption>
+            <tbody>
+            {cms:foreach field='specs'}
+              <tr class="specs__row"><th class="specs__key" scope="row">[field:key/]</th><td class="specs__val">[field:value/]</td></tr>
+            {/cms:foreach}
+            </tbody>
+          </table>
+        </section>
+        {/cms:if}
+
+        <section class="product__body content">
+          <h2 class="block-title">产品说明</h2>
+          [field:content/]
+        </section>
+
+        {cms:if field='download'}
+        <section class="attach-block">
+          <h2 class="block-title">资料下载</h2>
+          <p class="attach"><a class="btn btn--ghost" href="[field:download/]" download>规格书 / 图纸（[field:download format='filesize'/]）</a></p>
+        </section>
+        {/cms:if}
+
+        <section class="inquiry-block">
+          <h2 class="block-title">询价</h2>
+          <p class="muted">需要报价与交期？把产品编号带上，销售会直接联系你。</p>
+          <p><a class="btn btn--primary" href="/contact/">去询价表单</a></p>
+        </section>
+
+        <!-- 上下款：写在 detail 标签体内才能取到 hasPrev / hasNext（§5.5、§6.3） -->
+        <nav class="prenext" aria-label="同类上下款">
+          {cms:if field='hasPrev'}
+          {cms:prenext type='prev' category='all'}
+            <a class="prenext__link prenext__link--prev" data-dir="prev" rel="prev" href="[field:url/]"><span class="prenext__dir">上一款</span><span class="prenext__title">[field:title/]</span></a>
+          {/cms:prenext}
+          {cms:else/}
+          <p class="prenext__hint">已经是第一款</p>
+          {/cms:if}
+        </nav>
+      </article>
+      {/cms:detail}
+
+      <!-- 对比表：顶层命名查询 + query.<name>.rows.<i> 下标取值（§6.3 v2.2） -->
+      <section class="compare-block">
+        <h2 class="block-title">本类热门对比</h2>
+        {cms:if field='query.compare.empty'}<p class="notice notice--empty">暂无可对比的产品</p>{/cms:if}
+        {cms:query type='product' category='all' row='2' orderby='viewCountWeek desc' name='compare'}
+        {/cms:query}
+        <table class="compare">
+          <caption class="sr-only">两款产品的热门度对比</caption>
+          <thead><tr><th scope="col">项目</th><th scope="col">第一件</th><th scope="col">第二件</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">名称</th>
+              <td><a href="[field:query.compare.rows.0.url/]">[field:query.compare.rows.0.title/]</a></td>
+              <td><a href="[field:query.compare.rows.1.url/]">[field:query.compare.rows.1.title/]</a></td></tr>
+            <tr><th scope="row">品牌</th>
+              <td>[field:query.compare.rows.0.brand format='label'/]</td>
+              <td>[field:query.compare.rows.1.brand format='label'/]</td></tr>
+            <tr><th scope="row">价格</th>
+              <td>[field:query.compare.rows.0.price money='1'/]</td>
+              <td>[field:query.compare.rows.1.price money='1'/]</td></tr>
+            <tr><th scope="row">库存</th>
+              <td>[field:query.compare.rows.0.stock/]</td>
+              <td>[field:query.compare.rows.1.stock/]</td></tr>
+            <tr><th scope="row">周阅读</th>
+              <td>[field:query.compare.rows.0.viewCountWeek format='compact'/]</td>
+              <td>[field:query.compare.rows.1.viewCountWeek format='compact'/]</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 相关产品：RELATION 迭代（不分页），下面再给一条可分页的 relate 列表（§6.3） -->
+      {cms:if field='relatedProducts'}
+      <section class="related-block">
+        <h2 class="block-title">同系列（[field:relatedProducts.count/] 件）</h2>
+        <ul class="related-list">
+        {cms:foreach field='relatedProducts' row='6'}
+          <li class="related-list__item"><a class="related-list__link" href="[field:url/]">[field:title/]</a><span class="related-list__meta">[field:region format='label'/]</span></li>
+        {/cms:foreach}
+        </ul>
+      </section>
+      {/cms:if}
+
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">相关产品（可分页清单）</h2>
+          <p class="section__note">relate='field:relatedProducts' · orderby='relationOrder'</p>
+        </div>
+        {cms:if field='page.empty'}<p class="notice notice--empty">这款产品暂时没有关联产品</p>{/cms:if}
+        <div class="card-grid card-grid--3">
+        {cms:list type='product' category='all' relate='field:relatedProducts' exclude='self' orderby='relationOrder' row='4'}
+          <article class="card card--product [field:class/]">
+            <div class="card__body">
+              <p class="card__eyebrow"><span class="card__type">[field:brand format='label'/]</span></p>
+              <h3 class="card__title"><a class="card__link" href="[field:url/]">[field:title/]</a></h3>
+              <p class="card__price"><span class="price">[field:price money='1'/]</span></p>
+            </div>
+          </article>
+        {/cms:list}
+        </div>
+        {cms:include file='pager.html'/}
+      </section>
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}

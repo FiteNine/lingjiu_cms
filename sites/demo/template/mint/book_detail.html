@@ -1,0 +1,128 @@
+{cms:include file='header.html'/}
+<div class="wrap stack">
+
+  <nav class="crumbs" aria-label="面包屑">
+    <ol class="crumbs__list">
+    {cms:breadcrumb withContent='1'}
+      <li class="crumbs__item [field:class/]">
+      {cms:if field='current'}<span class="crumbs__current" aria-current="page">[field:name/]</span>{cms:else/}<a class="crumbs__link" href="[field:url/]">[field:name/]</a>{/cms:if}
+      </li>
+    {/cms:breadcrumb}
+    </ol>
+  </nav>
+
+  <div class="layout layout--aside">
+    <div class="layout__main">
+
+      <!-- 只在第 1 页渲染简介（page.isFirst）；目录是这一页的分页主体，必须在 if 块外面。 -->
+      {cms:if field='page.isFirst'}
+      <header class="book-head">
+        <p class="book-head__eyebrow">
+          <span class="badge">[field:typeName/]</span>
+          <span class="badge badge--ghost">[field:bookStatus format='label'/]</span>
+        </p>
+        <h1 class="book-head__title">[field:title/]</h1>
+        <p class="book-head__meta">
+          <span class="book-head__author">作者：[field:author/]</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>共 [field:childCount/] 章</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <time datetime="[field:publishTime format='iso'/]">[field:publishTime format='Y-m-d'/] 上架</time>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>[field:viewCount format='compact'/] 次阅读</span>
+        </p>
+        {cms:if field='summary'}<p class="book-head__lede">[field:summary/]</p>{/cms:if}
+        <div class="chip-row">
+        {cms:foreach field='tags'}
+          <a class="chip" href="[field:url/]">[field:name/]</a>
+        {/cms:foreach}
+        </div>
+      </header>
+      {/cms:if}
+
+      <!-- 内容树：source='content' + depth='2'（§6.4）。
+           起始节点只能是字面量，所以它列出的是该类型的顶层内容（书库），而不是"这本书的卷章"；
+           这本书自己的目录在下面用 list 标签的 of='self' 表达。
+           这里不读 children：只有"每个节点都有子节点"时它才存在，书库里做不到（见报告里的引擎缺口）。 -->
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">书库</h2>
+          <p class="section__note">channel source='content' type='book' depth='2'</p>
+        </div>
+        <div class="tree-grid">
+        {cms:channel source='content' type='book' depth='2'}
+          <div class="tree-card [field:class/]">
+            <a class="tree-card__link" href="[field:url/]">[field:label/]<span class="tree-card__count">[field:count/] 章</span></a>
+          </div>
+        {/cms:channel}
+        </div>
+      </section>
+
+      <!-- 最新章节：of='self'（锚定项 = 这本书） -->
+      <section class="section section--latest">
+        <div class="section__head">
+          <h2 class="section__title">最新章节</h2>
+          <p class="section__note">query type='chapter' of='self' row='5'</p>
+        </div>
+        <ol class="latest-list">
+        {cms:query type='chapter' category='all' of='self' row='5' orderby='publishTime desc'}
+          <li class="latest-list__item [field:class/]">
+            <a class="latest-list__link" href="[field:url/]">[field:title/]</a>
+            <time class="latest-list__time" datetime="[field:publishTime format='iso'/]">[field:publishTime format='relative'/]</time>
+          </li>
+        {/cms:query}
+        </ol>
+      </section>
+
+      <!-- 目录：详情页上的可分页列表（of='self'），分页 URL 走 detail_url_pattern 的 {n} 形态 -->
+      <section class="section section--catalog">
+        <div class="section__head">
+          <h2 class="section__title">章节目录</h2>
+          <p class="section__note">每页 100 章 · 共 [field:childCount/] 章</p>
+        </div>
+        {cms:if field='page.empty'}<p class="notice notice--empty">这本书还没有章节</p>{/cms:if}
+        <ol class="catalog">
+        {cms:list type='chapter' category='all' of='self' row='100' orderby='sort asc'}
+          <li class="catalog__item [field:class/]">
+            <a class="catalog__link" href="[field:url/]"><span class="catalog__no">[field:sort/]</span>[field:title/]</a>
+            <span class="catalog__meta">[field:volume/]</span>
+          </li>
+        {/cms:list}
+        </ol>
+        <!-- 第二种分页条组合：listsize='3'、只要 上一页/页码/当前页/下一页 -->
+        {cms:if field='page.totalPages'}
+        <nav class="pager pager--compact" aria-label="目录分页">
+          <div class="pager__list">
+          {cms:pagelist listsize='3' items='prev,pageno,current,next'}
+            <a class="pager__link [field:class/]" href="[field:url/]" rel="[field:rel/]">[field:label/]</a>
+          {/cms:pagelist}
+          </div>
+        </nav>
+        {/cms:if}
+      </section>
+
+      <!-- 同类书：orderby='viewCount desc'，不分页 -->
+      <section class="section">
+        <div class="section__head">
+          <h2 class="section__title">大家都在看</h2>
+          <p class="section__note">query type='book' row='4' orderby='viewCount desc'</p>
+        </div>
+        <div class="card-grid card-grid--3">
+        {cms:query type='book' category='all' row='4' orderby='viewCount desc'}
+          {cms:include file='card.html' size='compact'/}
+        {/cms:query}
+        </div>
+      </section>
+
+      <nav class="prenext" aria-label="上下本">
+        {cms:prenext type='both' category='all'}
+          <a class="prenext__link prenext__link--[field:type/]" data-dir="[field:type/]" rel="[field:type/]" href="[field:url/]"><span class="prenext__dir"></span><span class="prenext__title">[field:title/]</span></a>
+        {/cms:prenext}
+      </nav>
+
+    </div>
+    {cms:include file='aside.html'/}
+  </div>
+
+</div>
+{cms:include file='footer.html'/}
