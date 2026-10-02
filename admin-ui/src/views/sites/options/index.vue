@@ -1,21 +1,23 @@
 <template>
   <div class="page-container">
-    <el-card v-permission="'cms:publish:option:list'" shadow="never">
-      <div class="table-toolbar">
+    <el-card v-permission="'cms:publish:option:list'" shadow="never" class="options-card">
+      <div class="table-toolbar options-toolbar">
         <div class="toolbar-left">
           <el-input
             v-model="keyword"
             placeholder="按选项名过滤，如 page. / contact."
             clearable
-            style="width: 260px"
+            size="small"
+            style="width: 240px"
           />
           <span class="form-tip">
             值留空 = 未设置，发布时按引擎默认值处理；点「保存」只提交改动过的项
           </span>
         </div>
-        <div>
+        <div class="toolbar-right">
           <el-button
             v-permission="'cms:publish:option:edit'"
+            size="small"
             :icon="Plus"
             @click="openCreate"
           >
@@ -23,6 +25,7 @@
           </el-button>
           <el-button
             v-permission="'cms:publish:option:edit'"
+            size="small"
             type="primary"
             :icon="Select"
             :loading="saving"
@@ -34,59 +37,72 @@
         </div>
       </div>
 
-      <el-form v-loading="loading" :model="draft" label-width="240px">
-        <template v-for="group in groups" :key="group.key">
-          <template v-if="group.items.length || (group.key === CUSTOM_KEY && !keyword.trim())">
-            <el-divider content-position="left">
-              {{ group.title }}（{{ group.items.length }} 项）
-            </el-divider>
-            <div class="group-tip">{{ group.desc }}</div>
+      <div v-loading="loading" class="sections">
+        <section
+          v-for="group in visibleGroups"
+          :key="group.key"
+          class="section"
+          :class="{ 'is-wide': group.columns === 3 }"
+        >
+          <header class="section-head">
+            <span class="section-title">{{ group.title }}</span>
+            <span class="section-count">{{ group.items.length }}</span>
+            <el-tooltip :content="group.desc" placement="top" :show-after="150">
+              <el-icon class="section-info"><InfoFilled /></el-icon>
+            </el-tooltip>
+          </header>
 
-            <el-form-item
+          <div class="options" :class="`cols-${group.columns}`">
+            <div
               v-for="item in group.items"
               :key="item.optionCode"
-              :label="item.optionCode"
-              :error="jsonErrors[item.optionCode]"
+              class="opt"
+              :class="[`type-${item.valueType}`, { 'is-dirty': isDirty(item.optionCode) }]"
             >
-              <el-switch
-                v-if="item.valueType === 'bool'"
-                :model-value="boolValue(item.optionCode)"
-                active-text="开"
-                inactive-text="关"
-                @update:model-value="(val: boolean | string | number) => setBool(item.optionCode, val)"
-              />
-              <el-input-number
-                v-else-if="item.valueType === 'number'"
-                :model-value="numberValue(item.optionCode)"
-                :min="0"
-                controls-position="right"
-                @update:model-value="(val: number | undefined) => setNumber(item.optionCode, val)"
-              />
-              <el-input
-                v-else-if="item.valueType === 'json'"
-                v-model="draft[item.optionCode]"
-                type="textarea"
-                :rows="3"
-                placeholder='JSON 字面量，如 [] 或 {"code":"50x"}'
-              />
-              <el-input v-else v-model="draft[item.optionCode]" />
-
-              <div class="form-tip current-value">
-                当前值：{{ currentText(item.optionCode) }}
-                <span v-if="draft[item.optionCode] !== original[item.optionCode]">（已改动，未保存）</span>
+              <span class="opt-code" :title="cellTitle(item)">{{ item.optionCode }}</span>
+              <div class="opt-body">
+                <el-switch
+                  v-if="item.valueType === 'bool'"
+                  size="small"
+                  :model-value="boolValue(item.optionCode)"
+                  @update:model-value="(val: boolean | string | number) => setBool(item.optionCode, val)"
+                />
+                <el-input-number
+                  v-else-if="item.valueType === 'number'"
+                  size="small"
+                  :controls="false"
+                  :min="0"
+                  :model-value="numberValue(item.optionCode)"
+                  @update:model-value="(val: number | undefined) => setNumber(item.optionCode, val)"
+                />
+                <el-input
+                  v-else-if="item.valueType === 'json'"
+                  v-model="draft[item.optionCode]"
+                  type="textarea"
+                  :rows="3"
+                  placeholder='JSON 字面量，如 [] 或 {"code":"50x"}'
+                />
+                <el-input v-else v-model="draft[item.optionCode]" size="small" />
               </div>
-              <div v-if="hintOf(item.optionCode)" class="form-tip hint current-value">
+              <div v-if="jsonErrors[item.optionCode]" class="opt-error">
+                {{ jsonErrors[item.optionCode] }}
+              </div>
+              <div v-if="hintOf(item.optionCode)" class="form-tip hint opt-hint">
                 {{ hintOf(item.optionCode) }}
               </div>
-            </el-form-item>
-          </template>
-        </template>
+            </div>
+          </div>
 
-        <el-empty
-          v-if="!groups.some((group) => group.items.length)"
-          description="没有可显示的选项"
-        />
-      </el-form>
+          <div v-if="!group.items.length" class="form-tip section-empty">
+            还没有自定义选项：点右上「新增选项」补一条，如 contact.wechat 写微信号。
+          </div>
+        </section>
+      </div>
+
+      <el-empty
+        v-if="!loading && !visibleGroups.length"
+        description="没有可显示的选项"
+      />
     </el-card>
 
     <el-dialog v-model="createVisible" title="新增发布选项" width="560px" destroy-on-close>
@@ -142,7 +158,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { Plus, Select } from '@element-plus/icons-vue'
+import { InfoFilled, Plus, Select } from '@element-plus/icons-vue'
 import { listPublishOptions, savePublishOptions } from '@/api/cms'
 import type { PublishOptionItem, PublishOptionValueType } from '@/types'
 
@@ -208,6 +224,19 @@ function currentText(code: string) {
   return value === undefined || value === '' ? '（未设置）' : value
 }
 
+function isDirty(code: string) {
+  return draft[code] !== original.value[code]
+}
+
+/** 每格只在标签上挂原生 tooltip：当前值 + 改动状态 + 该选项的额外说明，不再单占一行 */
+function cellTitle(item: PublishOptionItem) {
+  const parts = [`当前值：${currentText(item.optionCode)}`]
+  if (isDirty(item.optionCode)) parts.push('已改动，未保存')
+  const hint = hintOf(item.optionCode)
+  if (hint) parts.push(hint)
+  return parts.join('\n')
+}
+
 /** JSON 选项的校验结果：空串 = 未设置，不算错 */
 const jsonErrors = computed<Record<string, string>>(() => {
   const errors: Record<string, string> = {}
@@ -247,102 +276,126 @@ interface OptionGroupDef {
   prefix: string
   title: string
   desc: string
+  /**
+   * 组内选项的列数。3 = 每个选项占一格排成九宫格（选项多的组用），
+   * 1 = 标签在左、控件在右的一行一格（只有一两个参数的零散组用，三组并排一行）。
+   */
+  columns: 1 | 3
 }
 
 /**
  * 前缀 → 分组说明。后端返回的选项名是「前缀.名称」两段式，所以按前缀成组；
  * 引擎以后加了新前缀，在这里补一行即可，补漏的会落到「站点自定义」那一组。
+ * 顺序 = 页面上的顺序：先大组（各自占满一行、内部九宫格），再零散组（三组并排），最后自定义。
  */
 const GROUP_DEFS: OptionGroupDef[] = [
   {
     prefix: 'page.',
     title: '页面开关',
+    columns: 3,
     desc: '控制要不要输出这一类页面：关掉某类页面（归档页、筛选页等）后，发布计划里不再生成它，也就不会多出一堆空页面。',
-  },
-  {
-    prefix: 'pages.',
-    title: '自定义静态页（JSON）',
-    desc: 'pages.static 声明由模板自己渲染的固定页面（关于我们、50x 错误页、活动页），每项一张页面。',
   },
   {
     prefix: 'url.',
     title: '地址规则',
+    columns: 3,
     desc: '各类页面的 URL 形态，决定产物落在 www/ 的哪个路径、页面之间怎么互链；花括号里是占位符（{tagSlug}、{year}、{n}…），发布时逐个替换。',
-  },
-  {
-    prefix: 'seo.',
-    title: 'SEO 收录',
-    desc: '哪些页面不写进 sitemap、要不要给分页页与筛选页做收录。',
   },
   {
     prefix: 'publish.',
     title: '发布行为',
+    columns: 3,
     desc: '发布引擎自己的工作参数：默认模式、线程数、单页超时、保留几个历史批次、预演与严格模式等。',
   },
   {
     prefix: 'facets.',
     title: '筛选页（facets）',
+    columns: 3,
     desc: '按字段组合出的筛选页：有哪些组合、单页数量上限与基数阈值；组合越多，产出页面增长越快。',
+  },
+  {
+    prefix: 'pages.',
+    title: '自定义静态页（JSON）',
+    columns: 3,
+    desc: 'pages.static 声明由模板自己渲染的固定页面（关于我们、50x 错误页、活动页），每项一张页面。',
   },
   {
     prefix: 'feed.',
     title: '订阅源（RSS / Atom）',
+    columns: 3,
     desc: '订阅源的格式、条数、收录哪些内容类型，以及要不要带全文。',
+  },
+  {
+    prefix: 'seo.',
+    title: 'SEO 收录',
+    columns: 3,
+    desc: '哪些页面不写进 sitemap、要不要给分页页与筛选页做收录。',
   },
   {
     prefix: 'search.',
     title: '站内搜索',
+    columns: 1,
     desc: '搜索索引的模式与规模上限：static 模式把索引直接打进产物，前端不依赖后端。',
+  },
+  {
+    prefix: 'comment.',
+    title: '评论',
+    columns: 1,
+    desc: '评论是否审核、是否随页面产出快照以及快照条数。',
+  },
+  {
+    prefix: 'media.',
+    title: '媒体资源',
+    columns: 1,
+    desc: '图片派生宽度（逗号分隔）与 CDN 域名；派生宽度决定生成几套缩略图。',
   },
   {
     prefix: 'archive.',
     title: '归档页规则',
+    columns: 1,
     desc: '归档页按年（year）还是按月（month）分组。',
   },
   {
     prefix: 'toc.',
     title: '正文目录',
+    columns: 1,
     desc: '正文目录（toc）取哪几级标题，逗号分隔，如 h2,h3。',
   },
   {
     prefix: 'reading.',
     title: '阅读时长',
+    columns: 1,
     desc: '每分钟按多少字折算阅读时长，影响页面上的「约 x 分钟」。',
   },
   {
     prefix: 'pager.',
     title: '分页文案',
+    columns: 1,
     desc: '分页器四个按钮的文案，按「首页,上一页,下一页,末页」顺序逗号分隔。',
   },
   {
     prefix: 'neighbor.',
     title: '上下篇',
+    columns: 1,
     desc: '详情页「上一篇 / 下一篇」各取几条，0 表示不出。',
   },
   {
     prefix: 'sitemap.',
     title: '站点地图',
+    columns: 1,
     desc: 'sitemap 分片大小：单文件最多放多少条地址，超过就拆成 sitemap 索引。',
   },
   {
     prefix: 'index.',
     title: '全站索引分片',
+    columns: 1,
     desc: '搜索索引单片的条数上限。',
-  },
-  {
-    prefix: 'media.',
-    title: '媒体资源',
-    desc: '图片派生宽度（逗号分隔）与 CDN 域名；派生宽度决定生成几套缩略图。',
   },
   {
     prefix: 'i18n.',
     title: '多语言备选',
+    columns: 1,
     desc: 'hreflang 备选地址列表（JSON），供搜索引擎识别其它语言版本。',
-  },
-  {
-    prefix: 'comment.',
-    title: '评论',
-    desc: '评论是否审核、是否随页面产出快照以及快照条数。',
   },
 ]
 
@@ -355,15 +408,32 @@ const groups = computed(() => {
     key: def.prefix,
     title: def.title,
     desc: def.desc,
+    columns: def.columns,
     items: [] as PublishOptionItem[],
   }))
-  const custom = { key: CUSTOM_KEY, title: '站点自定义', desc: CUSTOM_DESC, items: [] as PublishOptionItem[] }
+  const custom = {
+    key: CUSTOM_KEY,
+    title: '站点自定义',
+    desc: CUSTOM_DESC,
+    columns: 3 as const,
+    items: [] as PublishOptionItem[],
+  }
   for (const item of matched) {
     const group = result.find((candidate) => item.optionCode.startsWith(candidate.key)) || custom
     group.items.push(item)
   }
   return [...result, custom]
 })
+
+/**
+ * 能显示的小节。空小节里只有「站点自定义」要留着——它是新增选项的落点，
+ * 且没有过滤词时得让人看见「这里可以加自己的事实」。
+ */
+const visibleGroups = computed(() =>
+  groups.value.filter(
+    (group) => group.items.length || (group.key === CUSTOM_KEY && !keyword.value.trim()),
+  ),
+)
 
 /* ---------------- 保存 ---------------- */
 
@@ -471,11 +541,6 @@ onMounted(() => {
   margin-left: 8px;
 }
 
-/* el-form-item 的内容区是 flex：让「当前值」这类说明独占一行，别挤在开关右边 */
-.current-value {
-  width: 100%;
-}
-
 .hint {
   color: #b88230;
 }
@@ -486,15 +551,221 @@ onMounted(() => {
   gap: 12px;
 }
 
-.group-tip {
-  font-size: 12px;
-  color: #909399;
-  line-height: 20px;
-  margin: -6px 0 10px;
+.toolbar-right {
+  display: flex;
+  align-items: center;
 }
 
-:deep(.el-divider__text) {
+/*
+ * el-card 是 overflow: hidden、.el-card__body 是 overflow: auto——两个都会变成
+ * 「滚动容器」，把吸顶的工具栏按死在卡片里，所以都要放开（这里没有需要裁切的内容）。
+ */
+.options-card,
+.options-card :deep(.el-card__body) {
+  overflow: visible;
+}
+
+/* 55 个选项拉得很长，工具栏吸顶，滚到哪都能直接保存 */
+.options-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: -20px -20px 12px;
+  padding: 14px 20px 12px;
+  background-color: #fff;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  border-radius: var(--el-card-border-radius) var(--el-card-border-radius) 0 0;
+}
+
+/* 三列铺开：大组占满一行（内部九宫格），零散组各占一格、三组并排 */
+.sections {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.section {
+  min-width: 0;
+  padding: 8px 10px 10px;
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 4px;
+}
+
+.section.is-wide {
+  grid-column: 1 / -1;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.section-title {
+  font-size: 13px;
   font-weight: 600;
   color: #303133;
+}
+
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 11px;
+  margin-right: 6px;
+  border-radius: 2px;
+  background-color: var(--el-color-primary);
+  vertical-align: -1px;
+}
+
+.section-count {
+  font-size: 12px;
+  color: #a8abb2;
+}
+
+.section-info {
+  font-size: 13px;
+  color: #c0c4cc;
+  cursor: help;
+}
+
+.section-info:hover {
+  color: var(--el-color-primary);
+}
+
+.section-empty {
+  padding: 2px 6px;
+}
+
+.options {
+  display: grid;
+  gap: 2px 12px;
+  align-items: start;
+}
+
+.options.cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.options.cols-1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.opt {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+.opt:hover {
+  background-color: var(--el-fill-color-light);
+}
+
+/* 已改动未保存：底色 + 标签变色，保存按钮上的条数是汇总 */
+.opt.is-dirty {
+  background-color: #fdf6ec;
+}
+
+.opt-code {
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 12px;
+  color: #606266;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.opt.is-dirty .opt-code {
+  color: #b88230;
+  font-weight: 600;
+}
+
+.opt-body {
+  min-width: 0;
+}
+
+.opt-body :deep(.el-input),
+.opt-body :deep(.el-input-number) {
+  width: 100%;
+}
+
+/* 计数只用得着几位数，别拉满一格宽 */
+.opt-body :deep(.el-input-number) {
+  max-width: 160px;
+}
+
+.opt-error {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--el-color-danger);
+}
+
+.opt-hint {
+  margin-top: 2px;
+}
+
+/* JSON 文本域要宽度：占满整行 */
+.opt.type-json {
+  grid-column: 1 / -1;
+}
+
+/* 开关只有一格：标签在左、开关在右，省掉一整行控件高度 */
+.options.cols-3 .opt.type-bool {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+}
+
+/* 零散组：一行一个，标签定宽 */
+.options.cols-1 .opt {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+}
+
+.options.cols-1 .opt-code {
+  flex: 0 0 132px;
+}
+
+.options.cols-1 .opt-body {
+  flex: 1 1 auto;
+}
+
+.options.cols-1 .opt.type-json {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+}
+
+.options.cols-1 .opt.type-json .opt-code {
+  flex: none;
+}
+
+@media (max-width: 1200px) {
+  .options.cols-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .sections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .sections,
+  .options.cols-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>
