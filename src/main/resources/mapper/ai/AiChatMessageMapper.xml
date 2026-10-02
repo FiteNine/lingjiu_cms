@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingjiuw.cms.module.ai.copilot.mapper.AiChatMessageMapper">
+
+    <!-- ai_chat_message 是追加日志，没有 deleted 列，因此这里不写逻辑删除条件 -->
+    <select id="selectMaxSeq" resultType="java.lang.Integer">
+        select max(seq) from ai_chat_message where session_id = #{sessionId}
+    </select>
+
+</mapper>

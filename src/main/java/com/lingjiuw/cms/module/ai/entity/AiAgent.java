@@ -54,6 +54,13 @@ public class AiAgent {
     /** 1 要求返回 JSON；Anthropic 协议无对应参数，忽略 */
     private Integer jsonOutput;
 
+    /** 1 允许调用工具（全站 agent）/ 0 只对话（退化成试聊语义） */
+    private Integer toolEnabled;
+
+    /** 逗号分隔的工具组白名单；空 = CONTENT,TEMPLATE_READ,SYSTEM_READ。要能清空，故用 ALWAYS */
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    private String toolScope;
+
     private Integer status;
 
     private String remark;

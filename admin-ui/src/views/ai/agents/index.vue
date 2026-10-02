@@ -183,6 +183,31 @@
             @update:model-value="(val: boolean | string | number) => (form.jsonOutput = Number(val))"
           />
         </el-form-item>
+        <el-form-item label="允许调用工具">
+          <el-switch
+            :model-value="form.toolEnabled"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="开启"
+            inactive-text="关闭"
+            @update:model-value="(val: boolean | string | number) => (form.toolEnabled = Number(val))"
+          />
+          <span class="form-tip">关闭后全站agent退化为普通试聊</span>
+        </el-form-item>
+        <el-form-item label="工具范围">
+          <el-select
+            v-model="form.toolScope"
+            multiple
+            clearable
+            placeholder="空 = 默认组"
+            style="width: 100%"
+          >
+            <el-option label="内容运营（CONTENT）" value="CONTENT" />
+            <el-option label="模板只读（TEMPLATE_READ）" value="TEMPLATE_READ" />
+            <el-option label="系统只读（SYSTEM_READ）" value="SYSTEM_READ" />
+            <el-option label="改整站形态（PLATFORM，默认不暴露）" value="PLATFORM" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="状态">
           <el-switch
             :model-value="form.status"
@@ -351,6 +376,8 @@ const form = reactive({
   thinking: 1,
   reasoningEffort: 'high',
   jsonOutput: 0,
+  toolEnabled: 1,
+  toolScope: [] as string[],
   status: 1,
   remark: '',
 })
@@ -382,6 +409,9 @@ function openDialog(row?: TableRow) {
   form.thinking = row ? Number(row.thinking) : 1
   form.reasoningEffort = row ? String(row.reasoningEffort ?? 'high') : 'high'
   form.jsonOutput = row ? Number(row.jsonOutput) : 0
+  form.toolEnabled = row ? Number(row.toolEnabled ?? 1) : 1
+  form.toolScope =
+    row && row.toolScope ? String(row.toolScope).split(',').filter((item) => item !== '') : []
   form.status = row ? Number(row.status) : 1
   form.remark = row ? String(row.remark ?? '') : ''
   dialogVisible.value = true
@@ -413,6 +443,8 @@ async function onSave() {
       thinking: form.thinking,
       reasoningEffort: form.reasoningEffort,
       jsonOutput: form.jsonOutput,
+      toolEnabled: form.toolEnabled,
+      toolScope: form.toolScope.length ? form.toolScope.join(',') : null,
       status: form.status,
       remark: form.remark,
     }

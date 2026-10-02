@@ -21,6 +21,17 @@ public abstract class AbstractAiProtocolClient implements AiProtocolClient {
 
     /** 校验服务商可用并拼出完整请求地址（协议路径由各适配器自己给） */
     protected String endpoint(AiProvider provider, String path) {
+        return endpointOf(provider, path);
+    }
+
+    /**
+     * 与 {@link #endpoint} 同一套校验的静态入口。
+     *
+     * <p>给不用 {@link AiHttpClient}（整体缓冲，不支持流式）的适配器用：全站 agent 的
+     * 流式工具客户端走 JDK {@code HttpClient}，但"服务商是否可用 / base_url 是否合法"
+     * 必须是同一把尺子，不能各写一套。
+     */
+    public static String endpointOf(AiProvider provider, String path) {
         if (provider.getStatus() == null || provider.getStatus() != 1) {
             throw new BizException("服务商「" + provider.getName() + "」已停用");
         }

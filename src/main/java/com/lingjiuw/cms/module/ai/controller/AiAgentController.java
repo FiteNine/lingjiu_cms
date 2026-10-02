@@ -27,6 +27,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiAgentController {
 
     private final AiAgentService agentService;
+    private final com.lingjiuw.cms.module.ai.copilot.service.CopilotService copilotService;
+
+    /**
+     * 全站 agent 的智能体下拉：登录即可读（与 /api/ai/providers/options 同理）。
+     * 只回 id/name/code/model/protocol/thinking/jsonOutput/toolEnabled/toolScope，
+     * **不回 systemPrompt**——系统提示词属于配置细节。
+     */
+    @GetMapping("/options")
+    public Result<java.util.List<com.lingjiuw.cms.module.ai.copilot.dto.AgentOptionVO>> options() {
+        return Result.ok(copilotService.agentOptions());
+    }
 
     @GetMapping
     @PreAuthorize("hasAuthority('ai:agent:list')")

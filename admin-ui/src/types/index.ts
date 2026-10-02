@@ -150,6 +150,10 @@ export interface AiAgent {
   thinking: number
   reasoningEffort: string | null
   jsonOutput: number
+  /** 是否允许 copilot 调用工具（1 开启 / 0 关闭） */
+  toolEnabled: number
+  /** 逗号分隔的工具组白名单，空 = 默认组 */
+  toolScope: string | null
   status: number
   remark?: string | null
   createTime?: string
@@ -167,6 +171,97 @@ export interface AiChatResult {
   inputTokens: number | null
   outputTokens: number | null
 }
+
+/* ---------------- AI 管理：全站agent（Copilot） ---------------- */
+
+/** 智能体下拉项：只含 copilot 可用的智能体，不回 systemPrompt */
+export interface CopilotAgentOption {
+  id: number
+  name: string
+  code: string
+  model: string
+  protocol: AiProtocol
+  thinking: number
+  jsonOutput: number
+  toolEnabled: number
+  toolScope: string | null
+}
+
+export type CopilotRisk = 'READ' | 'WRITE' | 'DESTRUCTIVE'
+
+export interface CopilotSession {
+  id: number
+  title: string | null
+  siteId: number
+  siteName: string | null
+  agentId: number
+  agentName: string | null
+  status: number
+  rounds: number
+  toolCallCount: number
+  inputTokens: number
+  outputTokens: number
+  createTime: string
+}
+
+export interface CopilotChatMessage {
+  id: number
+  seq: number
+  role: 'user' | 'assistant' | 'tool'
+  content: string | null
+  reasoningContent: string | null
+  toolCalls: string | null
+  toolCallId: string | null
+  toolName: string | null
+  toolArgs: string | null
+  toolStatus: number | null
+  toolDurationMs: number | null
+  createTime: string
+}
+
+/** SSE 判别联合 */
+export type CopilotEvent =
+  | {
+      event: 'session'
+      data: {
+        sessionId: number
+        siteId: number
+        siteName: string
+        agentId: number
+        agentName: string
+        tools: { name: string; title: string; risk: CopilotRisk }[]
+      }
+    }
+  | { event: 'reasoning'; data: { delta: string } }
+  | { event: 'delta'; data: { delta: string } }
+  | {
+      event: 'tool_call'
+      data: { toolCallId: string; name: string; title: string; args: unknown; risk: CopilotRisk }
+    }
+  | {
+      event: 'tool_result'
+      data: {
+        toolCallId: string
+        ok: boolean
+        summary: string | null
+        durationMs: number
+        siteId: number
+        status: number
+      }
+    }
+  | {
+      event: 'confirm'
+      data: {
+        toolCallId: string
+        name: string
+        title: string
+        args: Record<string, unknown>
+        risk: CopilotRisk
+        expiresIn: number
+      }
+    }
+  | { event: 'done'; data: { messageId: number; inputTokens: number; outputTokens: number; rounds: number } }
+  | { event: 'error'; data: { code: number; message: string } }
 
 /* ---------------- 表格 ---------------- */
 

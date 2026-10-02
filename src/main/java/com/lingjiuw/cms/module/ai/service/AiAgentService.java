@@ -115,6 +115,8 @@ public class AiAgentService {
         agent.setThinking(request.thinking() == null ? 1 : request.thinking());
         agent.setReasoningEffort(effort);
         agent.setJsonOutput(request.jsonOutput() == null ? 0 : request.jsonOutput());
+        agent.setToolEnabled(request.toolEnabled() == null ? 1 : request.toolEnabled());
+        agent.setToolScope(StringUtils.hasText(request.toolScope()) ? request.toolScope().trim() : null);
         agent.setStatus(request.status() == null ? 1 : request.status());
         agent.setRemark(request.remark());
     }

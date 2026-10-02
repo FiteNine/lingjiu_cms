@@ -22,6 +22,8 @@ public record AgentVO(
         Integer thinking,
         String reasoningEffort,
         Integer jsonOutput,
+        Integer toolEnabled,
+        String toolScope,
         Integer status,
         String remark,
         LocalDateTime createTime,
@@ -33,6 +35,7 @@ public record AgentVO(
                 provider == null ? null : provider.getProtocol(),
                 agent.getModel(), agent.getSystemPrompt(), agent.getTemperature(), agent.getTopP(),
                 agent.getMaxTokens(), agent.getThinking(), agent.getReasoningEffort(), agent.getJsonOutput(),
+                agent.getToolEnabled(), agent.getToolScope(),
                 agent.getStatus(), agent.getRemark(), agent.getCreateTime(), agent.getUpdateTime());
     }
 }

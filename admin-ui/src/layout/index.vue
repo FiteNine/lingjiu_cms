@@ -60,6 +60,7 @@
             </template>
             <el-menu-item index="/ai/providers">AI服务商</el-menu-item>
             <el-menu-item index="/ai/agents">智能体</el-menu-item>
+            <el-menu-item index="/ai/copilot">全站agent</el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-scrollbar>

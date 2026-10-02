@@ -5,6 +5,9 @@ import type {
   AiChatResult,
   AiProtocol,
   AiProvider,
+  CopilotAgentOption,
+  CopilotChatMessage,
+  CopilotSession,
   PageResult,
 } from '@/types'
 
@@ -81,6 +84,10 @@ export interface AgentBody {
   thinking: number
   reasoningEffort: string
   jsonOutput: number
+  /** 是否允许 copilot 调用工具（1 开启 / 0 关闭） */
+  toolEnabled: number
+  /** 逗号分隔的工具组白名单，空 / 不传 = 默认组 */
+  toolScope?: string | null
   status: number
   remark?: string | null
 }
@@ -108,4 +115,33 @@ export function chatAgent(id: number, messages: AiChatMessage[]) {
     { messages },
     { timeout: AI_TIMEOUT },
   )
+}
+
+/* ---------------- 全站agent（Copilot） ---------------- */
+
+const COPILOT_BASE = '/api/ai/copilot'
+
+/** 智能体下拉：后端只回 OPENAI 协议且非 JSON 输出、启用的智能体（登录即可读） */
+export function copilotAgentOptions() {
+  return http.get<CopilotAgentOption[]>(`${AGENT_BASE}/options`)
+}
+
+export function copilotSessions(params: { page: number; size: number }) {
+  return http.get<PageResult<CopilotSession>>(`${COPILOT_BASE}/sessions`, params)
+}
+
+export function copilotSessionDetail(id: number) {
+  return http.get<{ session: CopilotSession; messages: CopilotChatMessage[] }>(
+    `${COPILOT_BASE}/sessions/${id}`,
+  )
+}
+
+/** 危险操作的人工确认。chat 流式对话走 utils/sse.ts，这里只有这一个普通 JSON 请求 */
+export function copilotConfirm(data: {
+  sessionId: number
+  toolCallId: string
+  decision: 'ALLOW' | 'DENY'
+  argsOverride?: Record<string, unknown>
+}) {
+  return http.post<null>(`${COPILOT_BASE}/confirm`, data)
 }

@@ -77,6 +77,12 @@ const router = createRouter({
           meta: { title: '智能体', group: 'AI管理' },
         },
         {
+          path: 'ai/copilot',
+          name: 'AiCopilot',
+          component: () => import('@/views/ai/copilot/index.vue'),
+          meta: { title: '全站agent', group: 'AI管理' },
+        },
+        {
           path: 'system/users',
           name: 'Users',
           component: () => import('@/views/system/users/index.vue'),

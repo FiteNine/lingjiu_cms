@@ -26,6 +26,8 @@ public record AgentSaveRequest(
         @Min(value = 0, message = "thinking 只能是 0 或 1") @Max(value = 1, message = "thinking 只能是 0 或 1") Integer thinking,
         String reasoningEffort,
         @Min(value = 0, message = "jsonOutput 只能是 0 或 1") @Max(value = 1, message = "jsonOutput 只能是 0 或 1") Integer jsonOutput,
+        @Min(value = 0, message = "toolEnabled 只能是 0 或 1") @Max(value = 1, message = "toolEnabled 只能是 0 或 1") Integer toolEnabled,
+        @Size(max = 255, message = "工具范围最长 255 字符") String toolScope,
         @Min(value = 0, message = "status 只能是 0 或 1") @Max(value = 1, message = "status 只能是 0 或 1") Integer status,
         @Size(max = 255, message = "备注最长 255 字符") String remark) {
 }
