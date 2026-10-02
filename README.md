@@ -225,7 +225,7 @@ npm run dev              # http://localhost:5173，/api 与 /uploads 代理到 8
 - **AI 流式输出**：试聊走非流式（一次性返回），未做 SSE；需要打字机效果时再加工
 - **AI 工具调用 / 知识库**：智能体只做模型参数与系统提示词配置，tools 与 RAG 未包含
 - **AI 会话持久化**：试聊是零散接口，对话历史由前端持有，不入库
-- **站点文件发布**：站点目录页只编辑磁盘上已有的文本文件（不新建、不上传、不删除、不重命名），CMS 也不会自动把内容或媒体库文件发布到站点目录；这一步是后续要做的
+- **站点文件发布**：站点目录页直接操作当前站点的网站文件目录：可浏览、查看文本与图片预览、保存已存在的文本文件（UTF-8、≤2MB）、新建文件与文件夹、删除文件或空文件夹；不提供上传与重命名，图片等非文本文件只能预览不能在线编辑。内容与媒体进入站点目录仍走「发布中心」的一键静态化，不经过这个页面
 - **站点级内容导入导出 / 站点间复制**：目前换站点只能用右上角切换后各自维护
 
 ## 接口一览（主要）
@@ -261,6 +261,9 @@ POST   /api/cms/sites/dirs           站点目录新建文件夹
 GET    /api/cms/sites/files          当前站点的网站文件目录浏览（文件树）
 GET    /api/cms/sites/files/content  读取站点目录下的文件（文本给原文，图片给 data URL）
 PUT    /api/cms/sites/files/content  保存站点目录下的文本文件
+POST   /api/cms/sites/files          新建站点文件
+POST   /api/cms/sites/files/dirs     新建站点文件夹
+DELETE /api/cms/sites/files          删除站点文件或空文件夹（文件夹须为空）
 GET    /api/cms/themes               当前站点 template/ 下的主题列表
 GET    /api/cms/publish/site/preview 预演：这一批会出哪些页面（不写盘）
 POST   /api/cms/publish/site         一键全站静态化（当前站点；mode=full|incremental）
