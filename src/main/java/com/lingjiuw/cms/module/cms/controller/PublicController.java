@@ -45,6 +45,7 @@ public class PublicController {
 
     @GetMapping("/categories")
     public Result<List<CategoryNode>> categories() {
-        return Result.ok(categoryService.tree());
+        // 公开口只暴露启用分类：与文章列表的 PUBLISHED 口径保持一致
+        return Result.ok(categoryService.tree(true));
     }
 }

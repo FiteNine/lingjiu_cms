@@ -31,12 +31,23 @@ public class CategoryService {
     private final CmsCategoryMapper categoryMapper;
     private final CmsContentCategoryMapper contentCategoryMapper;
 
+    /** 后台分类树：含停用分类（否则停用的分类无法在后台改回启用），见 {@link #tree(boolean)} */
     public List<CategoryNode> tree() {
+        return tree(false);
+    }
+
+    /**
+     * 分类树。onlyEnabled=true 时只查启用分类，供公开接口使用：公开文章列表走
+     * PUBLISHED 口径，分类口径应与之对齐，不应把停用分类连同状态字段暴露给未登录方。
+     */
+    public List<CategoryNode> tree(boolean onlyEnabled) {
+        Long siteId = SiteContext.siteId();
         List<CmsCategory> categories = categoryMapper.selectList(Wrappers.<CmsCategory>lambdaQuery()
-                .eq(CmsCategory::getSiteId, SiteContext.siteId())
+                .eq(CmsCategory::getSiteId, siteId)
+                .eq(onlyEnabled, CmsCategory::getStatus, 1)
                 .orderByAsc(CmsCategory::getSort)
                 .orderByAsc(CmsCategory::getId));
-        Map<Long, Long> counts = categoryMapper.selectContentCounts().stream()
+        Map<Long, Long> counts = categoryMapper.selectContentCounts(siteId).stream()
                 .collect(Collectors.toMap(CategoryContentCount::categoryId,
                         CategoryContentCount::count, (a, b) -> a));
         return buildTree(categories, counts);

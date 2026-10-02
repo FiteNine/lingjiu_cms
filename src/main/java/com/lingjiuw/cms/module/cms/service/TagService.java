@@ -31,7 +31,7 @@ public class TagService {
                 .eq(CmsTag::getSiteId, SiteContext.siteId())
                 .like(StringUtils.hasText(keyword), CmsTag::getName, keyword)
                 .orderByAsc(CmsTag::getId));
-        Map<Long, Long> counts = tagMapper.selectContentCounts().stream()
+        Map<Long, Long> counts = tagMapper.selectContentCounts(SiteContext.siteId()).stream()
                 .collect(Collectors.toMap(TagContentCount::tagId, TagContentCount::count, (a, b) -> a));
         return tags.stream()
                 .map(tag -> new TagVO(tag.getId(), tag.getName(), tag.getSlug(),
