@@ -3,6 +3,8 @@ package com.lingjiuw.cms.config;
 import com.lingjiuw.cms.common.site.SiteInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -33,6 +35,15 @@ public class WebConfig implements WebMvcConfigurer {
         }
         String location = "file:" + normalized + "/";
         registry.addResourceHandler("/uploads/**").addResourceLocations(location);
+    }
+
+    /** /uploads/** 的响应安全头（H-2）：只作用于上传目录，不影响其它接口 */
+    @Bean
+    public FilterRegistrationBean<UploadResourceHeaderFilter> uploadResourceHeaderFilter() {
+        FilterRegistrationBean<UploadResourceHeaderFilter> registration =
+                new FilterRegistrationBean<>(new UploadResourceHeaderFilter());
+        registration.addUrlPatterns("/uploads/*");
+        return registration;
     }
 
     /** 后台界面与公开接口的内容都按站点取，站点在这里统一解析 */
