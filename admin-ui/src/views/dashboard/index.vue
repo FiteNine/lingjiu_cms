@@ -43,9 +43,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getStats } from '@/api/cms'
+import { useUserStore } from '@/stores/user'
 import type { ContentStatus, StatsData } from '@/types'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
 const stats = ref<StatsData>({
   contentTotal: 0,
@@ -65,7 +67,7 @@ const statCards = computed(() => [
   { label: '分类', value: stats.value.categoryTotal, color: '#909399' },
   { label: '标签', value: stats.value.tagTotal, color: '#909399' },
   { label: '媒体', value: stats.value.mediaTotal, color: '#909399' },
-  { label: '用户', value: stats.value.userTotal, color: '#909399' },
+  { label: '用户（系统级）', value: stats.value.userTotal, color: '#909399' },
 ])
 
 const statusMap: Record<ContentStatus, string> = {
@@ -90,6 +92,11 @@ function goEdit(id: number, typeCode: string) {
 }
 
 onMounted(async () => {
+  // /api/cms/stats 需要 cms:stats:list：无权限时不请求，页面停留初始值，
+  // 避免请求拦截器每次进入仪表盘都对 403 弹一次全局错误
+  if (!userStore.hasPerm('cms:stats:list')) {
+    return
+  }
   loading.value = true
   try {
     // 后端字段缺失/返回 null 时用初始值兜底，模板里的 statCards 与表格不能读到 undefined

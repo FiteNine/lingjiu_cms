@@ -4,6 +4,7 @@ import com.lingjiuw.cms.common.api.Result;
 import com.lingjiuw.cms.module.cms.dto.StatsVO;
 import com.lingjiuw.cms.module.cms.service.StatsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ public class StatsController {
     private final StatsService statsService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('cms:stats:list')")
     public Result<StatsVO> stats() {
         return Result.ok(statsService.stats());
     }
