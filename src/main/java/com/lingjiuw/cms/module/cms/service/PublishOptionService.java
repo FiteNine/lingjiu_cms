@@ -22,8 +22,9 @@ import java.util.Map;
  * 站点发布选项（static-publish.md §2.7）。
  *
  * <p>{@code cms_site_publish_option} 只有 {@code (site_id, option_code, value)} 三列，**没有类型列**：
- * 选项值类型硬编码在发布引擎的三份清单里（{@link DbContentProvider} 的 public 常量）。本类只做三件事——
- * 把它读成 {@code {optionCode, value, valueType}}、按类型校验后写回、未知 optionCode 按新增处理。
+ * 选项值类型硬编码在发布引擎的三份清单里（{@link DbContentProvider} 的 public 常量）。本类只做四件事——
+ * 把它读成 {@code {optionCode, value, valueType}}、按类型校验后写回、未知 optionCode 按新增处理、
+ * 按 optionCode 逻辑删掉一条（删掉 = 回到引擎默认）。
  *
  * <p>取值口径与引擎一致（§2.7）：空串 = "未设置，用引擎默认"，所以空值一律落成空串，
  * 发布时 {@code DbContentProvider.parseOption} 会当成"没有配"。
@@ -93,6 +94,25 @@ public class PublishOptionService {
                 exists.setValue(value);
                 optionMapper.updateById(exists);
             }
+        }
+    }
+
+    /**
+     * 删除一条选项（逻辑删，@TableLogic）。删掉的效果与"值存空串"一样，都是"未设置，用引擎默认"，
+     * 区别只在后台表单里不再显示这一行；删掉之后同一个 optionCode 还能重新新增
+     * （部分唯一索引是 {@code (site_id, option_code) where deleted = 0}，见 §2.7）。
+     */
+    @Transactional
+    public void delete(String optionCode) {
+        String code = optionCode == null ? "" : optionCode.trim();
+        if (code.isEmpty()) {
+            throw new BizException("请选择要删除的发布选项");
+        }
+        // 逻辑删除的影响行数就是存在性判定：不用先查一次，也就没有查询与删除之间的竞态
+        if (optionMapper.delete(Wrappers.<CmsSitePublishOption>lambdaQuery()
+                .eq(CmsSitePublishOption::getSiteId, SiteContext.siteId())
+                .eq(CmsSitePublishOption::getOptionCode, code)) == 0) {
+            throw new BizException("发布选项不存在或已被删除：" + code);
         }
     }
 

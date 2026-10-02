@@ -246,6 +246,7 @@ GET    /api/cms/menus                站点导航菜单（含菜单项树）
 POST   /api/cms/menus/{id}/items     新增菜单项
 GET    /api/cms/publish/options      站点发布选项（含 valueType 元数据）
 PUT    /api/cms/publish/options      批量保存发布选项
+DELETE /api/cms/publish/options      删除一条发布选项（删掉 = 回到引擎默认值）
 GET    /api/cms/sites                站点列表（含站点目录的服务器绝对路径）
 GET    /api/cms/sites/options        站点下拉选项（登录即可读，只含当前用户可访问的站点，右上角切换器用）
 GET    /api/cms/sites/dirs           站点目录浏览（只在 cms.site.root-dir 内）

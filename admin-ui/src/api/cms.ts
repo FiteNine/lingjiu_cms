@@ -321,6 +321,11 @@ export function savePublishOptions(options: Array<{ optionCode: string; value: s
   return http.put<null>('/api/cms/publish/options', { options })
 }
 
+/** 删除一条选项：删掉后该项回到引擎默认值，同一个选项名可以再新增回来 */
+export function deletePublishOption(optionCode: string) {
+  return http.delete<null>('/api/cms/publish/options', { optionCode })
+}
+
 /** 预演：只算计划不写盘（当前站点）。problems 非空时不能发布 */
 export function previewPublish() {
   return http.get<PublishPreview>('/api/cms/publish/site/preview')

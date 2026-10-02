@@ -59,7 +59,18 @@
               class="opt"
               :class="[`type-${item.valueType}`, { 'is-dirty': isDirty(item.optionCode) }]"
             >
-              <span class="opt-code" :title="cellTitle(item)">{{ item.optionCode }}</span>
+              <div class="opt-head">
+                <span class="opt-code" :title="cellTitle(item)">{{ item.optionCode }}</span>
+                <el-button
+                  v-permission="'cms:publish:option:delete'"
+                  class="opt-del"
+                  link
+                  size="small"
+                  :icon="Delete"
+                  title="删除这一条选项，发布时按引擎默认值处理"
+                  @click="onDelete(item)"
+                />
+              </div>
               <div class="opt-body">
                 <el-switch
                   v-if="item.valueType === 'bool'"
@@ -157,9 +168,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { InfoFilled, Plus, Select } from '@element-plus/icons-vue'
-import { listPublishOptions, savePublishOptions } from '@/api/cms'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { Delete, InfoFilled, Plus, Select } from '@element-plus/icons-vue'
+import { deletePublishOption, listPublishOptions, savePublishOptions } from '@/api/cms'
 import type { PublishOptionItem, PublishOptionValueType } from '@/types'
 
 /* ---------------- 列表与草稿 ---------------- */
@@ -457,6 +468,35 @@ async function onSave() {
   }
 }
 
+/* ---------------- 删除选项 ---------------- */
+
+/** 有已知前缀 = 站点播种出来的标准选项（分组时也是这么判的，见 groups） */
+function isStandardOption(code: string) {
+  return GROUP_DEFS.some((def) => code.startsWith(def.prefix))
+}
+
+async function onDelete(item: PublishOptionItem) {
+  let tip = isStandardOption(item.optionCode)
+    ? `确认删除标准选项「${item.optionCode}」吗？删掉后发布时按引擎默认值处理，` +
+      '需要时用「新增选项」补回同名选项即可。'
+    : `确认删除自定义选项「${item.optionCode}」吗？`
+  if (dirtyItems.value.length) {
+    tip += ` 另外列表里有 ${dirtyItems.value.length} 项未保存的改动，删除后会按服务端值重新加载，这些改动会丢。`
+  }
+  try {
+    await ElMessageBox.confirm(tip, '提示', { type: 'warning' })
+  } catch {
+    return // 用户取消（'cancel' / 'close'）
+  }
+  try {
+    await deletePublishOption(item.optionCode)
+    ElMessage.success(`已删除选项 ${item.optionCode}`)
+    await load()
+  } catch {
+    // 失败提示由请求拦截器统一给出
+  }
+}
+
 /* ---------------- 新增选项 ---------------- */
 
 const createVisible = ref(false)
@@ -671,7 +711,17 @@ onMounted(() => {
   background-color: #fdf6ec;
 }
 
+/* 选项名与删除按钮同一行：名字过长时省略，删除按钮始终贴这一行的右端 */
+.opt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
+}
+
 .opt-code {
+  min-width: 0;
   font-family: Consolas, Monaco, 'Courier New', monospace;
   font-size: 12px;
   color: #606266;
@@ -679,6 +729,21 @@ onMounted(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: help;
+}
+
+/*
+ * 删除是低频动作：平时淡成占位色，不跟输入控件抢注意力，指向它才变红。
+ * 选择器带上 .opt-head 是为了压过 el-button 自己那条 .el-button.is-link（同为两段）。
+ */
+.opt-head .opt-del {
+  flex: none;
+  height: auto;
+  padding: 0;
+  color: var(--el-text-color-placeholder);
+}
+
+.opt-head .opt-del:hover {
+  color: var(--el-color-danger);
 }
 
 .opt.is-dirty .opt-code {
@@ -724,6 +789,11 @@ onMounted(() => {
   min-height: 28px;
 }
 
+/* 开关行里标签要占满剩余宽度，删除按钮才会贴到开关左边而不是紧跟选项名 */
+.options.cols-3 .opt.type-bool .opt-head {
+  flex: 1 1 auto;
+}
+
 /* 零散组：一行一个，标签定宽 */
 .options.cols-1 .opt {
   flex-direction: row;
@@ -732,7 +802,7 @@ onMounted(() => {
   min-height: 30px;
 }
 
-.options.cols-1 .opt-code {
+.options.cols-1 .opt-head {
   flex: 0 0 132px;
 }
 
@@ -746,7 +816,7 @@ onMounted(() => {
   gap: 3px;
 }
 
-.options.cols-1 .opt.type-json .opt-code {
+.options.cols-1 .opt.type-json .opt-head {
   flex: none;
 }
 
