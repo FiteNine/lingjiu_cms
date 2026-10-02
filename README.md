@@ -1,5 +1,7 @@
 # Lingjiuw CMS 企业级内容管理脚手架
 
+简体中文 | [English](README.en.md)
+
 **后台管理界面与 CMS 系统绑定在一起**：启动一个 Spring Boot 进程，浏览器打开 `http://localhost:8081/` 就是后台管理界面，REST API 在 `/api/**`，接口文档在 `/swagger-ui.html`。前端构建产物直接打包进 Spring Boot 静态资源目录，无需 Nginx、无需第二个服务。
 
 ## 技术栈
