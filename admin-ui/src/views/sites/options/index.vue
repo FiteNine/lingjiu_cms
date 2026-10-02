@@ -19,7 +19,7 @@
             v-permission="'cms:publish:option:edit'"
             size="small"
             :icon="Plus"
-            @click="openCreate"
+            @click="openCreate()"
           >
             新增选项
           </el-button>
@@ -102,6 +102,17 @@
                 {{ hintOf(item.optionCode) }}
               </div>
             </div>
+
+            <button
+              v-permission="'cms:publish:option:edit'"
+              type="button"
+              class="opt-add"
+              :title="`在「${group.title}」下新增选项`"
+              @click="openCreate(group.prefix)"
+            >
+              <el-icon><Plus /></el-icon>
+              <span>新增</span>
+            </button>
           </div>
 
           <div v-if="!group.items.length" class="form-tip section-empty">
@@ -417,6 +428,7 @@ const groups = computed(() => {
   )
   const result = GROUP_DEFS.map((def) => ({
     key: def.prefix,
+    prefix: def.prefix,
     title: def.title,
     desc: def.desc,
     columns: def.columns,
@@ -424,6 +436,7 @@ const groups = computed(() => {
   }))
   const custom = {
     key: CUSTOM_KEY,
+    prefix: '',
     title: '站点自定义',
     desc: CUSTOM_DESC,
     columns: 3 as const,
@@ -526,8 +539,9 @@ const createNumberValue = computed(() => {
   return Number.isNaN(value) ? undefined : value
 })
 
-function openCreate() {
-  createForm.optionCode = ''
+/** 从分类末尾的新增图标进来时带上该分类前缀，选出来的选项名会自动落回这一组 */
+function openCreate(prefix = '') {
+  createForm.optionCode = prefix
   createForm.valueType = 'text'
   createForm.value = ''
   createVisible.value = true
@@ -709,6 +723,28 @@ onMounted(() => {
 /* 已改动未保存：底色 + 标签变色，保存按钮上的条数是汇总 */
 .opt.is-dirty {
   background-color: #fdf6ec;
+}
+
+/* 分类末尾的「新增」占位格：虚线格，平时淡成占位色，指向才高亮 */
+.opt-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 3px 8px;
+  border: 1px dashed var(--el-border-color);
+  border-radius: 4px;
+  background: none;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.opt-add:hover {
+  color: var(--el-color-primary);
+  border-color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
 }
 
 /* 选项名与删除按钮同一行：名字过长时省略，删除按钮始终贴这一行的右端 */
