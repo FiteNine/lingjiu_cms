@@ -1,6 +1,7 @@
 target/
 uploads/
-logs/
+/logs/
+!admin-ui/src/views/system/logs/
 *.iml
 .idea/
 .vscode/
