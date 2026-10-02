@@ -149,6 +149,17 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- cms.jwt.secret 无默认值：给测试 JVM 注入一个 ≥32 字节的专用密钥，mvn test 才能启动 Spring 上下文；
+                         不用 src/test/resources/application.yml，避免遮蔽主配置。 -->
+                    <systemPropertyVariables>
+                        <CMS_JWT_SECRET>test-only-jwt-secret-32-bytes-ok!</CMS_JWT_SECRET>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

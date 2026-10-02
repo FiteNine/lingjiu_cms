@@ -26,7 +26,7 @@ public class JwtService {
         byte[] secretBytes = secret == null ? new byte[0] : secret.getBytes(StandardCharsets.UTF_8);
         if (secretBytes.length < 32) {
             throw new IllegalStateException("cms.jwt.secret 长度不足：HS256 至少需要 32 字节，当前 "
-                    + secretBytes.length + " 字节");
+                    + secretBytes.length + " 字节；请通过环境变量 CMS_JWT_SECRET 提供（至少 32 字节）");
         }
         if (expireHours <= 0) {
             throw new IllegalStateException("cms.jwt.expire-hours 必须为正数，当前值：" + expireHours);

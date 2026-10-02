@@ -89,11 +89,18 @@ npm run build            # 产物输出到 backend/src/main/resources/static
 
 ### 4. 启动
 
+启动前必须提供 JWT 密钥（`cms.jwt.secret` 无默认值，未设置或不足 32 字节会直接启动失败）：
+
 ```bash
+# 必须设置：CMS_JWT_SECRET，至少 32 字节（示例值仅用于本地开发）
+export CMS_JWT_SECRET='local-dev-only-secret-at-least-32-bytes'
+
 cd backend
 mvn spring-boot:run
 # 或打包后运行：mvn -DskipTests package && java -jar target/lingjiuw-cms-1.0.0.jar
 ```
+
+> Windows PowerShell 用 `$env:CMS_JWT_SECRET='local-dev-only-secret-at-least-32-bytes'` 设置。
 
 首次启动自动执行 Flyway 迁移（建表 + 种子数据）。
 
@@ -192,7 +199,7 @@ npm run dev              # http://localhost:5173，/api 与 /uploads 代理到 8
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
 | `server.port` | `8081` | 服务端口（同时服务后台管理页面） |
-| `cms.jwt.secret` | 内置开发值 | JWT 密钥，生产用环境变量 `CMS_JWT_SECRET` 覆盖（≥32 字节） |
+| `cms.jwt.secret` | 无默认值（必须设置） | JWT 密钥，启动前必须用环境变量 `CMS_JWT_SECRET` 提供（≥32 字节）；未设置或过短时启动失败 |
 | `cms.jwt.expire-hours` | `12` | token 有效期（小时） |
 | `cms.upload.dir` | `./uploads` | 媒体上传目录 |
 | `cms.upload.url-prefix` | `/uploads` | 媒体访问 URL 前缀 |

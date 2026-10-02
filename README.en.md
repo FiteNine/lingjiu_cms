@@ -194,7 +194,7 @@ The field basis for all three protocols comes from the official DeepSeek documen
 | Setting | Default | Description |
 | --- | --- | --- |
 | `server.port` | `8081` | Service port (also serves the admin console pages) |
-| `cms.jwt.secret` | built-in dev value | JWT secret; override in production with the `CMS_JWT_SECRET` environment variable (≥32 bytes) |
+| `cms.jwt.secret` | — (required) | JWT secret; must be provided with the `CMS_JWT_SECRET` environment variable (≥32 bytes); startup fails if unset or too short |
 | `cms.jwt.expire-hours` | `12` | Token lifetime (hours) |
 | `cms.upload.dir` | `./uploads` | Media upload directory |
 | `cms.upload.url-prefix` | `/uploads` | Media access URL prefix |
