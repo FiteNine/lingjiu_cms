@@ -5,7 +5,25 @@
   <link>https://demo.lingjiuw.local/</link>
   <description>静态发布引擎的演示站点：资讯、产品、书籍章节与作者一套齐全</description>
   <language>zh-CN</language>
-  <lastBuildDate>Fri, 02 Oct 2026 17:11:32 +0800</lastBuildDate>
+  <lastBuildDate>Sat, 03 Oct 2026 04:07:58 +0800</lastBuildDate>
+  <item>
+    <title>定时发布：让内容比页面先准备好</title>
+    <link>https://demo.lingjiuw.local/news/tech/scheduled-publish.html</link>
+    <guid isPermaLink="true">https://demo.lingjiuw.local/news/tech/scheduled-publish.html</guid>
+    <description><![CDATA[<p>内容准备好了，不代表页面已经准备好。</p>
+<h2>为什么不能到点改数据</h2>
+<p>靠前台请求判断"是否已到生效时间"，会把判断成本摊到每一次访问上，还会让静态产物与库里的数据长期不一致 —— 页面是旧的，数据是新的，谁也说不清哪个才算数。</p>
+<h2>调度器只做一件事</h2>
+<p>调度器不改内容，只在生效时刻投递一次发布任务。任务失败就重试，靠批次号保证幂等：同一批次跑多少遍，出来的产物都一样。</p>
+<h3>与增量发布的衔接</h3>
+<p>投递的是增量任务，只有依赖图里受影响的页面会被重算 —— 标题、摘要、列表分页、相关推荐，一个不少，也不多。</p>
+<h2>两个边界情况</h2>
+<p><strong>补跑</strong>：机器宕机错过的生效窗口，要在启动时回溯 24 小时重新投递，而不是静默跳过。</p>
+<p><strong>抢跑</strong>：把 publishTime 改早，不能只发这一篇，得用依赖图重算受影响页面，否则列表里还是旧顺序。</p>
+<h2>结论</h2>
+<p>定时发布不是定时改数据，是定时重算受影响的页面。</p>]]></description>
+    <pubDate>Sat, 04 Apr 2026 11:20:00</pubDate>
+  </item>
   <item>
     <title>发布批次与回滚</title>
     <link>https://demo.lingjiuw.local/news/release-and-rollback.html</link>

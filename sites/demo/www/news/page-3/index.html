@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>苏晴 · 灵久演示站</title>
+<title>新闻 · 灵久演示站</title>
 <meta name="description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
 <meta name="keywords" content="静态站点,内容管理,Java,模板引擎">
 <meta name="theme-color" content="#0f7a68">
-<link rel="canonical" href="https://demo.lingjiuw.local/author/su-qing.html">
-
+<link rel="canonical" href="https://demo.lingjiuw.local/news/page-3/">
+<meta name="robots" content="noindex,follow">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="灵久演示站">
-<meta property="og:title" content="苏晴">
-<meta property="og:url" content="https://demo.lingjiuw.local/author/su-qing.html">
+<meta property="og:title" content="新闻">
+<meta property="og:url" content="https://demo.lingjiuw.local/news/page-3/">
 <meta property="og:image" content="">
 <meta property="og:description" content="灵久 CMS 演示站点，用来验证内容类型、字段索引、筛选落地页与静态发布产物">
 <link rel="alternate" type="application/rss+xml" title="灵久演示站 订阅" href="/feed.xml">
@@ -43,8 +43,8 @@
           
         </li>
       
-        <li class="main-nav__item ">
-          <a class="main-nav__link" href="/news/" aria-current="">新闻</a>
+        <li class="main-nav__item active">
+          <a class="main-nav__link" href="/news/" aria-current="page">新闻</a>
           
         </li>
       
@@ -58,8 +58,8 @@
           
         </li>
       
-        <li class="main-nav__item active">
-          <a class="main-nav__link" href="/author/" aria-current="page">作者</a>
+        <li class="main-nav__item ">
+          <a class="main-nav__link" href="/author/" aria-current="">作者</a>
           
         </li>
       
@@ -94,57 +94,70 @@
       </li>
     
       <li class="crumbs__item current">
-      <span class="crumbs__current" aria-current="page">苏晴</span>
+      <span class="crumbs__current" aria-current="page">新闻</span>
       </li>
     
     </ol>
   </nav>
 
+  <header class="page-head">
+    <p class="page-head__eyebrow">列表页兜底模板 list.html</p>
+    <h1 class="page-head__title">新闻</h1>
+    <p class="page-head__meta">共 17 条内容 · 每页 8 条</p>
+  </header>
+
   <div class="layout layout--aside">
     <div class="layout__main">
-
-      <!-- 作者是内置内容类型 author，作者页就是它的详情页（§2.1） -->
       
-      <header class="author-box">
-        
-        <img class="author-box__avatar" src="/uploads/demo/avatar-su-qing.jpg" alt="苏晴" width="160" height="160" loading="lazy" decoding="async">
-        
-        <div class="author-box__body">
-          <p class="author-box__eyebrow">作者 · author_detail.html</p>
-          <h1 class="author-box__name">苏晴</h1>
-          <p class="author-box__honor">年度优秀编辑</p>
-          <p class="author-box__bio">相信好内容需要好的信息架构，反对把文章写成没有层次的墙。</p>
-          <p class="author-box__stats">
-            <span>作品 0 篇</span>
-            <span class="dot" aria-hidden="true">·</span>
-            <span>0 天前更新</span>
-          </p>
-        </div>
-      </header>
+      <div class="card-grid card-grid--2">
       
+        <!-- 通用内容卡片：被多个列表模板 include，size='big' / 'compact' 通过 include 字面量参数传入。
+     只使用"跨类型公共字段"，因此在 type='all' 的列表里也能编译通过（§6.3）。 -->
+<article class="card card--big ">
+  <a class="card__figure" href="/product/initech-archive-a7.html" tabindex="-1" aria-hidden="true">
+  
+    <img class="card__img" src="/uploads/demo/product-07.jpg" alt="Initech 归档一体机 A7" width="320" height="200" loading="lazy" decoding="async">
+  
+  </a>
+  <div class="card__body">
+    <p class="card__eyebrow">
+      <span class="card__type">产品</span>
+      <span class="badge badge--top">置顶</span>
+      
+    </p>
+    <h3 class="card__title"><a class="card__link" href="/product/initech-archive-a7.html">Initech 归档一体机 A7</a></h3>
+    <p class="card__summary">给历史批次准备的归档一体机：保留最近几批完整产物，回滚只切一次软链。</p>
+    <p class="card__meta">
+      <time class="card__time" datetime="2026-01-05T08:40:00">2026-01-05</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span class="card__views">3340 阅读</span>
+    </p>
+  </div>
+</article>
 
-      <section class="section">
-        <div class="section__head">
-          <h2 class="section__title">TA 的文章</h2>
-          <p class="section__note">relate='field:authorId'，可分页</p>
-        </div>
-        <p class="notice notice--empty">这位作者还没有文章</p>
-        <div class="card-grid card-grid--2">
-        
-        </div>
-        <!-- 分页条包装：分页主体在 LIST / HOME / DETAIL（列表分页）上都存在，page.totalPages 为假时不渲染页码。
+      
+      </div>
+      <!-- 分页条包装：分页主体在 LIST / HOME / DETAIL（列表分页）上都存在，page.totalPages 为假时不渲染页码。
      注意：include 的字面量参数只能被 param 字段引用读出，无法插进 pagelist 的参数里，
      因此 items / listsize 只能写死在这里；需要第二种组合时直接写在模板里（见 book_detail.html）。 -->
 
 <nav class="pager" aria-label="分页导航">
-  <p class="pager__info">第 1 / 1 页 · 共 0 条</p>
+  <p class="pager__info">第 3 / 3 页 · 共 17 条</p>
   <div class="pager__list">
+  
+    <a class="pager__link " href="/news/" rel="">首页</a>
+  
+    <a class="pager__link " href="/news/page-2/" rel="prev">上一页</a>
+  
+    <a class="pager__link " href="/news/" rel="">1</a>
+  
+    <a class="pager__link " href="/news/page-2/" rel="">2</a>
+  
+    <a class="pager__link current" href="/news/page-3/" rel="">3</a>
   
   </div>
 </nav>
 
-
-      </section>
 
     </div>
     <!-- 侧栏：热门（orderby + offset）、栏目树（channel source='category' + children）、
@@ -226,7 +239,7 @@
     <h2 class="widget__title">栏目导览</h2>
     <ul class="widget__list widget__list--tree">
     
-      <li class="widget__item ">
+      <li class="widget__item active">
         <a class="widget__link" href="/news/">新闻<span class="widget__stat">17</span></a>
       </li>
     
@@ -297,7 +310,7 @@
       <h2 class="footer-col__title">栏目</h2>
       <ul class="footer-links">
       
-        <li class="footer-links__item"><a class="footer-links__link " href="/news/">新闻<span class="footer-links__count">17</span></a></li>
+        <li class="footer-links__item"><a class="footer-links__link active" href="/news/">新闻<span class="footer-links__count">17</span></a></li>
       
         <li class="footer-links__item"><a class="footer-links__link " href="/case/">案例<span class="footer-links__count">9</span></a></li>
       
@@ -315,7 +328,7 @@
       
         <a class="chip " href="/chapter/">章节</a>
       
-        <a class="chip current" href="/author/">作者</a>
+        <a class="chip " href="/author/">作者</a>
       
         <a class="chip " href="/about/">关于我们</a>
       

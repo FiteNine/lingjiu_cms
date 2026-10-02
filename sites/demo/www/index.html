@@ -257,6 +257,13 @@
         <ol class="feed-list">
         
           <li class="feed-list__item ">
+            <time class="feed-list__time" datetime="2026-04-04T11:20:00">2026-04-04</time>
+            <a class="feed-list__link" href="/news/tech/scheduled-publish.html">定时发布：让内容比页面先准备好</a>
+            <span class="feed-list__type">文章</span>
+            <span class="feed-list__stat">0</span>
+          </li>
+        
+          <li class="feed-list__item ">
             <time class="feed-list__time" datetime="2026-03-28T16:05:00">2026-03-28</time>
             <a class="feed-list__link" href="/news/release-and-rollback.html">发布批次与回滚</a>
             <span class="feed-list__type">文章</span>
@@ -289,13 +296,6 @@
             <a class="feed-list__link" href="/product/initech-form-relay.html">Initech 表单中转站</a>
             <span class="feed-list__type">产品</span>
             <span class="feed-list__stat">2480</span>
-          </li>
-        
-          <li class="feed-list__item ">
-            <time class="feed-list__time" datetime="2026-03-03T09:40:00">2026-03-03</time>
-            <a class="feed-list__link" href="/case/facet-pages-are-configured.html">筛选落地页是配置出来的</a>
-            <span class="feed-list__type">文章</span>
-            <span class="feed-list__stat">977</span>
           </li>
         
         </ol>
@@ -363,6 +363,31 @@
         </div>
         
         <div class="card-grid card-grid--2">
+        
+          <!-- 通用内容卡片：被多个列表模板 include，size='big' / 'compact' 通过 include 字面量参数传入。
+     只使用"跨类型公共字段"，因此在 type='all' 的列表里也能编译通过（§6.3）。 -->
+<article class="card card--big ">
+  <a class="card__figure" href="/news/tech/scheduled-publish.html" tabindex="-1" aria-hidden="true">
+  
+    <img class="card__img" src="/uploads/demo/cover-15.jpg" alt="定时发布：让内容比页面先准备好" width="320" height="200" loading="lazy" decoding="async">
+  
+  </a>
+  <div class="card__body">
+    <p class="card__eyebrow">
+      <span class="card__type">文章</span>
+      
+      
+    </p>
+    <h3 class="card__title"><a class="card__link" href="/news/tech/scheduled-publish.html">定时发布：让内容比页面先准备好</a></h3>
+    <p class="card__summary">生效时间与生成时间解耦：到点由调度器触发一次增量发布，而不是靠前台请求时判断。</p>
+    <p class="card__meta">
+      <time class="card__time" datetime="2026-04-04T11:20:00">2026-04-04</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span class="card__views">0 阅读</span>
+    </p>
+  </div>
+</article>
+
         
           <!-- 通用内容卡片：被多个列表模板 include，size='big' / 'compact' 通过 include 字面量参数传入。
      只使用"跨类型公共字段"，因此在 type='all' 的列表里也能编译通过（§6.3）。 -->
@@ -489,38 +514,13 @@
 </article>
 
         
-          <!-- 通用内容卡片：被多个列表模板 include，size='big' / 'compact' 通过 include 字面量参数传入。
-     只使用"跨类型公共字段"，因此在 type='all' 的列表里也能编译通过（§6.3）。 -->
-<article class="card card--big ">
-  <a class="card__figure" href="/case/facet-pages-are-configured.html" tabindex="-1" aria-hidden="true">
-  
-    <img class="card__img" src="/uploads/demo/cover-10.jpg" alt="筛选落地页是配置出来的" width="320" height="200" loading="lazy" decoding="async">
-  
-  </a>
-  <div class="card__body">
-    <p class="card__eyebrow">
-      <span class="card__type">文章</span>
-      
-      
-    </p>
-    <h3 class="card__title"><a class="card__link" href="/case/facet-pages-are-configured.html">筛选落地页是配置出来的</a></h3>
-    <p class="card__summary">不做全排列：手工声明组合，只为真的有内容的取值出页。</p>
-    <p class="card__meta">
-      <time class="card__time" datetime="2026-03-03T09:40:00">2026-03-03</time>
-      <span class="dot" aria-hidden="true">·</span>
-      <span class="card__views">977 阅读</span>
-    </p>
-  </div>
-</article>
-
-        
         </div>
         <!-- 分页条包装：分页主体在 LIST / HOME / DETAIL（列表分页）上都存在，page.totalPages 为假时不渲染页码。
      注意：include 的字面量参数只能被 param 字段引用读出，无法插进 pagelist 的参数里，
      因此 items / listsize 只能写死在这里；需要第二种组合时直接写在模板里（见 book_detail.html）。 -->
 
 <nav class="pager" aria-label="分页导航">
-  <p class="pager__info">第 1 / 8 页 · 共 46 条</p>
+  <p class="pager__info">第 1 / 8 页 · 共 47 条</p>
   <div class="pager__list">
   
     <a class="pager__link current" href="/" rel="">1</a>
@@ -592,6 +592,11 @@
     <ul class="widget__list">
     
       <li class="widget__item ">
+        <a class="widget__link" href="/product/initech-form-relay.html">Initech 表单中转站</a>
+        <time class="widget__time" datetime="2026-03-06T10:00:00">7 个月前</time>
+      </li>
+    
+      <li class="widget__item ">
         <a class="widget__link" href="/case/facet-pages-are-configured.html">筛选落地页是配置出来的</a>
         <time class="widget__time" datetime="2026-03-03T09:40:00">7 个月前</time>
       </li>
@@ -611,11 +616,6 @@
         <time class="widget__time" datetime="2026-02-22T13:10:00">7 个月前</time>
       </li>
     
-      <li class="widget__item ">
-        <a class="widget__link" href="/news/tech/render-scope-and-field.html">渲染作用域与字段解析</a>
-        <time class="widget__time" datetime="2026-02-16T10:45:00">7 个月前</time>
-      </li>
-    
     </ul>
   </section>
 
@@ -624,7 +624,7 @@
     <ul class="widget__list widget__list--tree">
     
       <li class="widget__item ">
-        <a class="widget__link" href="/news/">新闻<span class="widget__stat">16</span></a>
+        <a class="widget__link" href="/news/">新闻<span class="widget__stat">17</span></a>
       </li>
     
       <li class="widget__item ">
@@ -640,13 +640,13 @@
     
       <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
     
-      <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+      <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">22</span></a>
     
-      <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+      <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">19</span></a>
     
       <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
     
-      <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+      <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">9</span></a>
     
     </div>
     <p class="widget__more"><a href="/tags/">全部标签 →</a></p>
@@ -658,7 +658,7 @@
     
       <li class="archive-list__item ">
         <a class="archive-list__link" href="/archive/2026/01/">2026 年 1 月</a>
-        <span class="archive-list__count">21 篇</span>
+        <span class="archive-list__count">22 篇</span>
       </li>
     
       <li class="archive-list__item ">
@@ -694,7 +694,7 @@
       <h2 class="footer-col__title">栏目</h2>
       <ul class="footer-links">
       
-        <li class="footer-links__item"><a class="footer-links__link " href="/news/">新闻<span class="footer-links__count">16</span></a></li>
+        <li class="footer-links__item"><a class="footer-links__link " href="/news/">新闻<span class="footer-links__count">17</span></a></li>
       
         <li class="footer-links__item"><a class="footer-links__link " href="/case/">案例<span class="footer-links__count">9</span></a></li>
       
@@ -726,13 +726,13 @@
       
         <a class="tagcloud__item " href="/tag/java/">Java<span class="tagcloud__count">26</span></a>
       
-        <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">21</span></a>
+        <a class="tagcloud__item " href="/tag/cms/">内容管理<span class="tagcloud__count">22</span></a>
       
-        <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">18</span></a>
+        <a class="tagcloud__item " href="/tag/static/">静态化<span class="tagcloud__count">19</span></a>
       
         <a class="tagcloud__item " href="/tag/design/">设计<span class="tagcloud__count">10</span></a>
       
-        <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">8</span></a>
+        <a class="tagcloud__item " href="/tag/template/">模板引擎<span class="tagcloud__count">9</span></a>
       
       </div>
     </div>
