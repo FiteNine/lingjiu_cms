@@ -11,6 +11,7 @@ import com.lingjiuw.cms.module.system.entity.SysDictType;
 import com.lingjiuw.cms.module.system.mapper.SysDictItemMapper;
 import com.lingjiuw.cms.module.system.mapper.SysDictTypeMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -36,14 +37,24 @@ public class DictService {
         checkTypeCodeUnique(request.code(), null);
         SysDictType type = new SysDictType();
         applyType(type, request);
-        dictTypeMapper.insert(type);
+        try {
+            dictTypeMapper.insert(type);
+        } catch (DuplicateKeyException e) {
+            // 唯一索引是最终保证：并发下 checkTypeCodeUnique 可能同时通过，这里兜成业务提示
+            throw new BizException("字典编码已存在");
+        }
     }
 
     public void updateType(Long id, DictTypeSaveRequest request) {
         SysDictType type = requireType(id);
         checkTypeCodeUnique(request.code(), id);
         applyType(type, request);
-        dictTypeMapper.updateById(type);
+        try {
+            dictTypeMapper.updateById(type);
+        } catch (DuplicateKeyException e) {
+            // 改字典编码同样可能和别人撞车，兜成业务提示而不是 500
+            throw new BizException("字典编码已存在");
+        }
     }
 
     @Transactional
@@ -77,7 +88,12 @@ public class DictService {
         requireType(request.typeId());
         SysDictItem item = new SysDictItem();
         applyItem(item, request);
-        dictItemMapper.insert(item);
+        try {
+            dictItemMapper.insert(item);
+        } catch (DuplicateKeyException e) {
+            // (type_id, value) 部分唯一索引是最终保证：并发下同名值会同时通过应用层检查
+            throw new BizException("该字典类型下已存在同名值");
+        }
     }
 
     public void updateItem(Long id, DictItemSaveRequest request) {
@@ -87,7 +103,12 @@ public class DictService {
         }
         requireType(request.typeId());
         applyItem(item, request);
-        dictItemMapper.updateById(item);
+        try {
+            dictItemMapper.updateById(item);
+        } catch (DuplicateKeyException e) {
+            // 改 value 同样可能和同类型的其它项撞车，兜成业务提示而不是 500
+            throw new BizException("该字典类型下已存在同名值");
+        }
     }
 
     public void deleteItem(Long id) {

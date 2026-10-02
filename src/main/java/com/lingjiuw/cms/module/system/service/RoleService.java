@@ -11,6 +11,7 @@ import com.lingjiuw.cms.module.system.mapper.SysRoleMapper;
 import com.lingjiuw.cms.module.system.mapper.SysRoleMenuMapper;
 import com.lingjiuw.cms.module.system.mapper.SysUserRoleMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -46,14 +47,24 @@ public class RoleService {
         checkCodeUnique(request.code(), null);
         SysRole role = new SysRole();
         applyRequest(role, request);
-        roleMapper.insert(role);
+        try {
+            roleMapper.insert(role);
+        } catch (DuplicateKeyException e) {
+            // 唯一索引是最终保证：并发下 checkCodeUnique 可能同时通过，这里兜成业务提示
+            throw new BizException("角色编码已存在");
+        }
     }
 
     public void update(Long id, RoleSaveRequest request) {
         SysRole role = requireRole(id);
         checkCodeUnique(request.code(), id);
         applyRequest(role, request);
-        roleMapper.updateById(role);
+        try {
+            roleMapper.updateById(role);
+        } catch (DuplicateKeyException e) {
+            // 改角色编码同样可能和别人撞车，兜成业务提示而不是 500
+            throw new BizException("角色编码已存在");
+        }
     }
 
     @Transactional

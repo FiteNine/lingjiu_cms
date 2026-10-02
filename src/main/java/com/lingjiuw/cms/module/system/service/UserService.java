@@ -15,6 +15,7 @@ import com.lingjiuw.cms.module.system.mapper.SysUserMapper;
 import com.lingjiuw.cms.module.system.mapper.SysUserRoleMapper;
 import com.lingjiuw.cms.module.system.mapper.SysUserSiteMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +70,12 @@ public class UserService {
         user.setStatus(1); // 新增默认启用；请求带了 status 时由 applyRequest 覆盖
         applyRequest(user, request);
         user.setPassword(passwordEncoder.encode(request.password()));
-        userMapper.insert(user);
+        try {
+            userMapper.insert(user);
+        } catch (DuplicateKeyException e) {
+            // 唯一索引是最终保证：并发下 checkUsernameUnique 可能同时通过，这里兜成业务提示
+            throw new BizException("用户名已存在");
+        }
         syncRoles(user.getId(), request.roleIds());
         syncSites(user.getId(), request.siteIds());
     }
@@ -82,7 +88,12 @@ public class UserService {
         if (StringUtils.hasText(request.password())) {
             user.setPassword(passwordEncoder.encode(request.password()));
         }
-        userMapper.updateById(user);
+        try {
+            userMapper.updateById(user);
+        } catch (DuplicateKeyException e) {
+            // 改用户名同样可能和别人撞车，兜成业务提示而不是 500
+            throw new BizException("用户名已存在");
+        }
         syncRoles(id, request.roleIds());
         syncSites(id, request.siteIds());
     }
