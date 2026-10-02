@@ -7,6 +7,7 @@ import com.lingjiuw.cms.module.system.dto.LoginRequest;
 import com.lingjiuw.cms.module.system.dto.LoginResponse;
 import com.lingjiuw.cms.module.system.dto.ProfileVO;
 import com.lingjiuw.cms.module.system.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +26,9 @@ public class AuthController {
 
     @PostMapping("/login")
     @OperLog(module = "登录", action = "用户登录")
-    public Result<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
-        return Result.ok(authService.login(request));
+    public Result<LoginResponse> login(@RequestBody @Valid LoginRequest request, HttpServletRequest httpRequest) {
+        // 限流按 TCP 对端地址：X-Forwarded-For 客户端可伪造，用它会让按 IP 的计数被绕过
+        return Result.ok(authService.login(request, httpRequest.getRemoteAddr()));
     }
 
     /** 当前登录用户信息（自助接口：登录即可访问，不额外校验功能权限） */

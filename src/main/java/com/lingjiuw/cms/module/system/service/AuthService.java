@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -29,16 +30,23 @@ public class AuthService {
     private final SysMenuMapper menuMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LoginAttemptGuard loginAttemptGuard;
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request, String clientIp) {
+        // 限流键：用户名（忽略大小写）+ 客户端 IP；成功登录会清零该键
+        String attemptKey = request.username().trim().toLowerCase(Locale.ROOT) + "|"
+                + (clientIp == null ? "" : clientIp);
+        loginAttemptGuard.checkAllowed(attemptKey);
         SysUser user = userMapper.selectOne(Wrappers.<SysUser>lambdaQuery()
                 .eq(SysUser::getUsername, request.username()));
         if (user == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
+            loginAttemptGuard.onFailure(attemptKey);
             throw new BizException("用户名或密码错误");
         }
         if (user.getStatus() == null || user.getStatus() != 1) {
             throw new BizException("账号已停用，请联系管理员");
         }
+        loginAttemptGuard.onSuccess(attemptKey);
 
         ProfileVO profile = buildProfile(user);
         LoginUser loginUser = LoginUser.builder()
