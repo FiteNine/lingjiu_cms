@@ -21,6 +21,7 @@ import com.lingjiuw.cms.module.cms.mapper.CmsTagMapper;
 import com.lingjiuw.cms.module.system.mapper.SysUserSiteMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -99,6 +100,20 @@ public class SiteService {
     }
 
     /**
+     * 公开接口的严格解析：显式传了站点 id 就必须有效且可访问，否则报错；没传（null）才回落默认站点。
+     * 后台接口仍走 {@link #resolveSiteId(Long)} 的宽松回落——切到的站点被删或收回授权后后台不能卡死。
+     */
+    public Long resolveSiteIdStrict(Long requested) {
+        if (requested == null) {
+            return resolveSiteId(null);
+        }
+        if (!accessibleSiteIds().contains(requested)) {
+            throw new BizException("站点不存在或无权访问");
+        }
+        return requested;
+    }
+
+    /**
      * 当前用户可切换访问的站点 id：
      * <ul>
      *   <li>admin 角色不受绑定限制，全部站点都算；</li>
@@ -150,7 +165,12 @@ public class SiteService {
         CmsSite site = new CmsSite();
         applyRequest(site, request);
         site.setRootDir(prepareSiteDir(request.rootDir()));
-        siteMapper.insert(site);
+        try {
+            siteMapper.insert(site);
+        } catch (DuplicateKeyException e) {
+            // 唯一索引是最终保证：checkCodeUnique 只兜 code，root_dir 撞车（uk_cms_site_root_dir）在这里兜成业务提示
+            throw new BizException("该站点目录已被其它站点占用，请更换站点目录");
+        }
         // 入库后才有站点 id：内置内容类型、默认菜单与默认发布选项按站点补齐
         siteBootstrapService.seed(site.getId());
     }
@@ -160,7 +180,12 @@ public class SiteService {
         checkCodeUnique(request.code(), id);
         applyRequest(site, request);
         site.setRootDir(prepareSiteDir(request.rootDir()));
-        siteMapper.updateById(site);
+        try {
+            siteMapper.updateById(site);
+        } catch (DuplicateKeyException e) {
+            // 同上：编辑时把目录改成别人已用的目录也会撞唯一索引，兜成业务提示而不是 500
+            throw new BizException("该站点目录已被其它站点占用，请更换站点目录");
+        }
     }
 
     /** 站点与它名下的从属数据（用户绑定、播种的内置类型 / 菜单 / 发布选项）在同一个事务里删干净 */
