@@ -94,4 +94,12 @@ public interface CmsContentMapper extends BaseMapper<CmsContent> {
 
     /** 公开详情接口的浏览量自增（见 XML 里的口径说明）。 */
     int increaseViewCount(@Param("id") Long id);
+
+    /**
+     * 统计仍引用该媒体 URL 的内容数：删除媒体行前的死链检查（M-6）。
+     *
+     * <p>媒体字段（IMAGES / FILES）的值以 url 字符串存在 {@code data}(jsonb) 里，
+     * 所以按文本包含统计；URL 中可能含 like 通配符，SQL 用 position 而非 like（见 XML）。
+     */
+    long countContentRefsByUrl(@Param("siteId") Long siteId, @Param("url") String url);
 }

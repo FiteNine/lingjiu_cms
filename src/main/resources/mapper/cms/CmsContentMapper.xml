@@ -747,4 +747,17 @@
         update cms_content set view_count = view_count + 1 where id = #{id} and deleted = 0
     </update>
 
+    <!--
+      删除媒体前的引用统计（M-6）：cms_content.data 是 jsonb，IMAGES / FILES 字段的值以 url
+      字符串存在里面。用 position(... in data::text) 而不是 like：url 里可能带 % / _ 等 like
+      通配符，逐个转义成本高还容易漏；data 为 null 时 position 返回 null，条件不成立，不计入。
+    -->
+    <select id="countContentRefsByUrl" resultType="long">
+        select count(*)
+          from cms_content
+         where site_id = #{siteId}
+           and deleted = 0
+           and position(#{url} in data::text) &gt; 0
+    </select>
+
 </mapper>
