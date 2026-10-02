@@ -44,6 +44,7 @@ public class PublicArticleService {
     private final CmsContentTagMapper contentTagMapper;
     private final CmsCategoryMapper categoryMapper;
     private final CmsTagMapper tagMapper;
+    private final ViewCountUpdater viewCountUpdater;
 
     public PageResult<PublicArticleVO> page(long page, long size, Long categoryId, String keyword) {
         long current = Math.max(page, 1);
@@ -79,7 +80,8 @@ public class PublicArticleService {
             throw new BizException("文章不存在或未发布");
         }
         CmsContent content = matches.get(0);
-        contentMapper.increaseViewCount(content.getId());
+        // 浏览量异步落库（L-3）：公开 GET 不在读路径上写库；展示值仍同步 +1，不受异步影响
+        viewCountUpdater.increment(content.getId());
         content.setViewCount(content.getViewCount() == null ? 1 : content.getViewCount() + 1);
         List<Long> contentIds = List.of(content.getId());
         return toVO(content, true, categoriesOf(contentIds).get(content.getId()),
