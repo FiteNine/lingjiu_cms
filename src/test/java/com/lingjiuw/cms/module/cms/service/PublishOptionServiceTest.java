@@ -128,7 +128,9 @@ class PublishOptionServiceTest {
         CmsSite site = new CmsSite();
         site.setName("发布选项测试站");
         site.setCode(code);
-        site.setRootDir("option-test");
+        // root_dir 上有唯一索引 uk_cms_site_root_dir（where deleted = 0）：setUp 与「删除只作用于当前站点」
+        // 会在同一个事务里各插一个站点，写死同一个目录名会当场撞索引，所以跟着 code 一起唯一
+        site.setRootDir(code);
         site.setStatus(1);
         site.setIsDefault(0);
         siteMapper.insert(site);
