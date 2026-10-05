@@ -2,6 +2,61 @@
 
 简体中文 | [English](README.en.md)
 
+[![CI](https://github.com/FiteNine/lingjiu_cms/actions/workflows/ci.yml/badge.svg)](https://github.com/FiteNine/lingjiu_cms/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](#技术栈)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen.svg)](#技术栈)
+[![GitHub stars](https://img.shields.io/github/stars/FiteNine/lingjiu_cms)](https://github.com/FiteNine/lingjiu_cms/stargazers)
+
+Java 21 + Spring Boot 3.5 + Vue 3 的 CMS 脚手架：后台管理界面、REST API、静态化发布引擎、AI Agent 全在**一个 JAR** 里。
+让它区别于普通后台模板的是三件事——**内容结构在库里定义**（不是写死在代码里的表）、
+**站点是渲染出来的静态产物**（不是每次请求都查库）、**后台里有一个能直接操控 CMS 的 AI Agent**。
+
+![后台管理界面](docs/images/admin-dashboard.png)
+
+## 30 秒跑起来
+
+```bash
+git clone https://github.com/FiteNine/lingjiu_cms.git && cd lingjiu_cms
+export CMS_JWT_SECRET=$(openssl rand -base64 32)   # PowerShell：$env:CMS_JWT_SECRET='至少 32 字节的随机串'
+docker compose up -d --build
+```
+
+打开 <http://localhost:8081/>，用 `admin / admin123` 登录。首次要装依赖并编译前后端，约 3–5 分钟；
+镜像建好后再起是秒级。不想用 Docker 就从下面的「快速开始」走源码方式。
+
+> 本机 5432 端口已被别的 PostgreSQL 占用时，整条 compose 会起不来：只要数据库用 `docker compose up -d postgres`，
+> 或删掉 compose 里 postgres 的端口映射（应用走 compose 内网，不需要宿主机端口）。
+
+## 它和别的 CMS 有什么不同
+
+| 不同点 | 具体表现 |
+| --- | --- |
+| 内容结构是数据，不是代码 | 内容类型（普通/单页/层级、URL 规则、列表与详情模板、SEO 字段）与字段定义（19 种字段类型）在后台建完即用；表单控件、列表列、`where` / `orderby` / `facet` 全部由定义驱动。文章只是内置类型 `article`，没有独立的文章表 |
+| 站点是渲染出来的静态产物 | 「一键全站静态化」把 `template/<主题>/` 与库内容渲染成站点目录下 `www/` 一套可直接托管的静态站，顺带产出 sitemap / feed / robots / 搜索索引 / `cms-site.json`；发布前可「预演」看这一批会出哪些页面，发布后留批次记录与失败明细 |
+| 后台里有个 AI Agent | 工具层按 MCP Tool 语义设计，能查内容、改分类、看发布状态；每个操作都受当前登录用户的权限约束，危险操作前端二次确认 |
+| 部署面很小 | 后台界面打包进 Spring Boot 静态资源，`java -jar` 就是全部；无 Redis、无 Nginx、无第二个服务 |
+| 有测试 | 584 个用例（含真库用例），GitHub Actions 每次提交都跑：先在全新库上从零跑一遍迁移，再跑全部用例 |
+
+**动态建模**：内容类型与字段定义在后台建完即用，19 种字段类型。
+
+![内容类型](docs/images/content-types.png)
+
+**一键全站静态化**：模板 + 库内容 → 可直接托管的静态站；批次、失败明细、增量发布都在这一页。
+
+![发布中心](docs/images/publish-center.png)
+
+**AI 管理**：同一份智能体配置适配 OpenAI / Anthropic / Responses 三种协议。
+
+![智能体](docs/images/ai-agents.png)
+
+## 目录
+
+[30 秒跑起来](#30-秒跑起来) · [它和别的 CMS 有什么不同](#它和别的-cms-有什么不同) · [技术栈](#技术栈) ·
+[目录结构](#目录结构) · [快速开始](#快速开始) · [功能清单](#功能清单) · [多站点](#多站点) ·
+[AI 模块](#ai-模块服务商--智能体) · [API 约定](#api-约定) · [权限模型](#权限模型rbac) · [常用配置](#常用配置) ·
+[新增业务模块的步骤](#新增业务模块的步骤) · [设计取舍](#设计取舍本期刻意未包含) · [接口一览](#接口一览主要) · [许可证](#许可证)
+
 **后台管理界面与 CMS 系统绑定在一起**：启动一个 Spring Boot 进程，浏览器打开 `http://localhost:8081/` 就是后台管理界面，REST API 在 `/api/**`，接口文档在 `/swagger-ui.html`。前端构建产物直接打包进 Spring Boot 静态资源目录，无需 Nginx、无需第二个服务。
 
 ## 技术栈
@@ -23,7 +78,9 @@
 ```
 backend/
 ├── pom.xml                      # Maven 构建
-├── docker-compose.yml           # 新机器一键起 PostgreSQL 16
+├── Dockerfile                   # 多阶段构建：前端 → 后端 → 运行时镜像
+├── docker-compose.yml           # 一键起 PostgreSQL 16 + 应用（只要库：docker compose up -d postgres）
+├── .github/workflows/ci.yml     # CI：全新库上从零跑迁移 + 单元测试与真库用例
 ├── admin-ui/                    # 后台管理前端（Vue3 + Element Plus）
 │   └── vite.config.ts           # 构建产物输出到 src/main/resources/static
 ├── src/main/java/com/lingjiuw/cms/
@@ -44,6 +101,9 @@ backend/
 ```
 
 ## 快速开始
+
+> **只想跑起来看看** → 用上面的「30 秒跑起来」，不用装 JDK / Node / PostgreSQL。
+> 下面是从源码跑起来的方式，改代码时用这个。
 
 ### 1. 前置条件
 
@@ -143,8 +203,7 @@ npm run dev              # http://localhost:5173，/api 与 /uploads 代理到 8
 > 再「一键全站静态化」把 `sites/<站点>/template/<主题>/` 的模板 + 数据库内容
 > 渲染成 `sites/<站点>/www/` 下一套可直接托管的静态站，并顺带产出
 > sitemap / feed / robots / 搜索索引 / `cms-site.json`。契约见
-> [`docs/static-publish.md`](docs/static-publish.md)，
-> 一次真实站点的反推交付见 [`docs/lingjiuw-site-reverse.md`](docs/lingjiuw-site-reverse.md)。
+> [`docs/static-publish.md`](docs/static-publish.md)。
 
 ## 多站点
 
@@ -174,7 +233,7 @@ npm run dev              # http://localhost:5173，/api 与 /uploads 代理到 8
 - 已刻意不做的：`frequency_penalty` / `presence_penalty`（官方已标 deprecated 且传入不生效）、Anthropic 协议下的 JSON 输出（该协议无等价参数）。
 - 安全边界：API Key 只回掩码（`sk-****8e3c`），编辑时留空表示不修改，操作日志里的 `apiKey` 自动脱敏，服务商被智能体引用时不允许删除。
 
-三种协议的字段依据均来自 DeepSeek 官方文档，抓取快照与逐条出处见 `.tmp/deepseek-api-notes.md`。
+三种协议的字段依据均来自 DeepSeek 官方文档。
 
 ## API 约定
 
@@ -277,3 +336,7 @@ POST   /api/ai/agents/{id}/chat      智能体试聊（无状态，前端带全�
 GET    /api/public/articles         已发布文章（免登录，可带 siteId；读内置类型 article 的内容）
 GET    /api/public/articles/{slug}  文章详情（免登录，可带 siteId）
 ```
+
+## 许可证
+
+[Apache License 2.0](LICENSE)，Copyright 2026 FiteNine。

@@ -2,6 +2,65 @@
 
 [简体中文](README.md) | English
 
+[![CI](https://github.com/FiteNine/lingjiu_cms/actions/workflows/ci.yml/badge.svg)](https://github.com/FiteNine/lingjiu_cms/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](#tech-stack)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen.svg)](#tech-stack)
+[![GitHub stars](https://img.shields.io/github/stars/FiteNine/lingjiu_cms)](https://github.com/FiteNine/lingjiu_cms/stargazers)
+
+A Java 21 + Spring Boot 3.5 + Vue 3 CMS scaffold: the admin console, REST API, static-publishing engine and an AI agent
+all live in **one JAR**. Three things set it apart from a plain admin template — **content structure is defined in the
+database** (not hard-coded tables), **sites are rendered static output** (not a database query per request), and
+**the console ships an AI agent that operates the CMS itself**.
+
+![Admin console](docs/images/admin-dashboard.png)
+
+## Run It in 30 Seconds
+
+```bash
+git clone https://github.com/FiteNine/lingjiu_cms.git && cd lingjiu_cms
+export CMS_JWT_SECRET=$(openssl rand -base64 32)
+docker compose up -d --build
+```
+
+Open <http://localhost:8081/> and sign in with `admin / admin123`. The first build installs dependencies and compiles
+frontend and backend (about 3–5 minutes); later starts take seconds. No Docker? Use the source path in
+[Quick Start](#quick-start).
+
+> If port 5432 is already taken by another PostgreSQL the compose stack will not start: run
+> `docker compose up -d postgres` for the database only, or drop the published port in `docker-compose.yml`
+> (the application reaches Postgres over the compose network, no host port needed).
+
+## What Makes It Different
+
+| | |
+| --- | --- |
+| Content structure is data, not code | Content types (plain / single page / hierarchical, URL rules, list and detail templates, SEO fields) and field definitions (19 field types) work the moment you create them in the console; form controls, list columns and `where` / `orderby` / `facet` are all driven by those definitions. An article is just the built-in `article` type — there is no separate article table |
+| Sites are rendered static output | "One-click full-site static publishing" renders `template/<theme>/` plus database content into a ready-to-host static site under the site's `www/`, along with sitemap / feed / robots / search index / `cms-site.json`. Dry-run the batch first, then keep the batch records and per-page failure details |
+| An AI agent inside the console | The tool layer follows MCP Tool semantics: it can query content, change categories and check publish state. Every action is bounded by the logged-in user's permissions, and destructive ones ask for confirmation |
+| A very small deployment surface | The admin UI is packaged into Spring Boot's static resources — `java -jar` is the whole thing. No Redis, no Nginx, no second service |
+| It is tested | 584 test cases (including real-database cases) run on every push: migrations are applied from scratch to an empty database first, then the whole suite runs |
+
+**Dynamic modelling**: content types and field definitions are usable the moment you create them; 19 field types.
+
+![Content types](docs/images/content-types.png)
+
+**One-click full-site static publishing**: templates + database content → a ready-to-host static site; batches, failure details and incremental publishing all live on this page.
+
+![Publish centre](docs/images/publish-center.png)
+
+**AI management**: one agent configuration adapts to the OpenAI / Anthropic / Responses protocols.
+
+![Agents](docs/images/ai-agents.png)
+
+## Contents
+
+[Run It in 30 Seconds](#run-it-in-30-seconds) · [What Makes It Different](#what-makes-it-different) · [Tech Stack](#tech-stack) ·
+[Directory Structure](#directory-structure) · [Quick Start](#quick-start) · [Feature List](#feature-list) · [Multi-site](#multi-site) ·
+[AI Module](#ai-module-providers--agents) · [API Conventions](#api-conventions) · [Permission Model](#permission-model-rbac) ·
+[Common Configuration](#common-configuration) · [Steps to Add a Business Module](#steps-to-add-a-business-module) ·
+[Design Trade-offs](#design-trade-offs-deliberately-out-of-scope-for-now) · [API Overview](#api-overview-main-endpoints) · [License](#license)
+
 **The admin console and the CMS are bound together**: start one Spring Boot process and open `http://localhost:8081/` in a browser for the admin console; the REST API lives under `/api/**` and the API docs at `/swagger-ui.html`. The frontend build output is packaged directly into Spring Boot's static resource directory — no Nginx, no second service.
 
 ## Tech Stack
@@ -23,7 +82,9 @@
 ```
 backend/
 ├── pom.xml                      # Maven build
-├── docker-compose.yml           # One-command PostgreSQL 16 for a new machine
+├── Dockerfile                   # Multi-stage build: frontend → backend → runtime image
+├── docker-compose.yml           # One command for PostgreSQL 16 + the application (database only: docker compose up -d postgres)
+├── .github/workflows/ci.yml     # CI: migrations from scratch on an empty database + unit and real-database tests
 ├── admin-ui/                    # Admin frontend (Vue3 + Element Plus)
 │   └── vite.config.ts           # Build output goes to src/main/resources/static
 ├── src/main/java/com/lingjiuw/cms/
@@ -45,6 +106,9 @@ backend/
 ```
 
 ## Quick Start
+
+> **Just want to see it running?** Use [Run It in 30 Seconds](#run-it-in-30-seconds) — no JDK, Node or PostgreSQL
+> needed. What follows is the from-source path, which is what you want while changing code.
 
 ### 1. Prerequisites
 
@@ -138,8 +202,7 @@ npm run dev              # http://localhost:5173, /api and /uploads proxy to 808
 > templates under `sites/<site>/template/<theme>/` plus database contents into a directly hostable
 > static site under `sites/<site>/www/`, along with sitemap / feed / robots / search index /
 > `cms-site.json`. The contract is documented in
-> [`docs/static-publish.md`](docs/static-publish.md), and a real-site reverse-engineering delivery is
-> in [`docs/lingjiuw-site-reverse.md`](docs/lingjiuw-site-reverse.md).
+> [`docs/static-publish.md`](docs/static-publish.md).
 
 ## Multi-site
 
@@ -169,7 +232,7 @@ Console entries: `AI Management → AI Providers`, `AI Management → Agents`.
 - Deliberately left out: `frequency_penalty` / `presence_penalty` (officially deprecated, and passing them has no effect), and JSON output under the Anthropic protocol (that protocol has no equivalent parameter).
 - Security boundaries: API keys are only ever returned masked (`sk-****8e3c`); leaving the field empty on edit means "do not change"; the `apiKey` in operation logs is masked automatically; a provider still referenced by an agent cannot be deleted.
 
-The field basis for all three protocols comes from the official DeepSeek documentation; the fetch snapshot with a per-item source list is in `.tmp/deepseek-api-notes.md`.
+The field basis for all three protocols comes from the official DeepSeek documentation.
 
 ## API Conventions
 
@@ -268,3 +331,7 @@ POST   /api/ai/agents/{id}/chat     Agent trial chat (stateless; the frontend se
 GET    /api/public/articles         Published articles (no login; optional siteId; reads contents of the built-in type article)
 GET    /api/public/articles/{slug}  Article detail (no login; optional siteId)
 ```
+
+## License
+
+[Apache License 2.0](LICENSE), Copyright 2026 FiteNine.
