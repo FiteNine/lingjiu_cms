@@ -1,0 +1,19 @@
+# 构建上下文收敛：这些都是宿主机上的产物或与镜像无关的文件
+target/
+admin-ui/node_modules/
+admin-ui/dist/
+src/main/resources/static/
+uploads/
+logs/
+.m2/
+.git/
+.gitignore
+AGENTS.md
+dev.cmd
+dev.ps1
+docker-compose.yml
+Dockerfile
+.dockerignore
+docs/
+README.md
+README.en.md

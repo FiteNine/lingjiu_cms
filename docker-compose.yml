@@ -17,5 +17,30 @@ services:
       timeout: 5s
       retries: 12
 
+  # 只想要数据库时：docker compose up -d postgres
+  app:
+    build: .
+    image: lingjiuw-cms
+    container_name: lingjiuw-cms
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lingjiuw_cms
+      SPRING_DATASOURCE_USERNAME: cms
+      SPRING_DATASOURCE_PASSWORD: cms123456
+      # 必须由外部提供（≥32 字节），与 application.yml 的 cms.jwt.secret 是同一条要求：
+      # 镜像里不留默认密钥，否则等于没有密钥。例：CMS_JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
+      CMS_JWT_SECRET: ${CMS_JWT_SECRET:?必须提供 CMS_JWT_SECRET（至少 32 字节）}
+    ports:
+      - "8081:8081"
+    volumes:
+      # 首次创建空卷时 Docker 会把镜像里的 sites/（含 demo 站点模板）填进卷里
+      - cms-sites:/app/sites
+      - cms-uploads:/app/uploads
+
 volumes:
   pgdata:
+  cms-sites:
+  cms-uploads:
