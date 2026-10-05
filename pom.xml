@@ -160,6 +160,35 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <!--
+                手动建表：mvn flyway:migrate
+                默认连本地开发库（与 application.yml 一致），可用 -Dflyway.url / -Dflyway.user / -Dflyway.password 覆盖。
+                存在的理由：ContentServiceTest / DbContentProviderTest / PublishOptionServiceTest / ArchiveChannelTest /
+                DemoPublishTest 这 5 个真库用例都设了 spring.flyway.enabled=false，直接打已经建好表的库，
+                所以全新环境（CI、新机器）要先跑一次它，mvn test 才是绿的。
+                migrate 目标不绑定任何生命周期阶段，mvn test / mvn package 不受影响。
+            -->
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>${flyway.version}</version>
+                <configuration>
+                    <url>jdbc:postgresql://localhost:5432/lingjiuw_cms</url>
+                    <user>cms</user>
+                    <password>cms123456</password>
+                    <locations>
+                        <location>filesystem:src/main/resources/db/migration</location>
+                    </locations>
+                </configuration>
+                <dependencies>
+                    <!-- 插件独立于项目依赖解析，驱动要自己带上 -->
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${postgresql.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 </project>

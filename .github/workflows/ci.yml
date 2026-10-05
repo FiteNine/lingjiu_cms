@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 测试与迁移
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: lingjiuw_cms
+          POSTGRES_USER: cms
+          POSTGRES_PASSWORD: cms123456
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cms -d lingjiuw_cms"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      # ContentServiceTest / DbContentProviderTest / PublishOptionServiceTest / ArchiveChannelTest /
+      # DemoPublishTest 这 5 个真库用例都设了 spring.flyway.enabled=false，直接打已经建好表的库，
+      # 所以全新环境要先跑一次迁移，否则 mvn test 会以 relation "cms_site" does not exist 收场。
+      - name: 建表（Flyway 迁移，配置与 application.yml 一致）
+        run: mvn -B flyway:migrate
+      - name: 单元测试 + 真库用例
+        run: mvn -B test
+      # FlywayMigrationIT 暂时不进 CI：它在临时 schema 里从零迁移后断言「每个站点都有
+      # article/single/author 三个内置类型」，而 V20261005090001__lingjiuw_site_seed.sql
+      # 建的 lingjiuw 站点没有这三个类型，该断言在站点 3 上稳定失败。
+      # 是改断言（§12.2 期 0 的判据原本只针对默认站点）还是改种子，需要作者定。
+      # 手动跑：mvn -B test -Dtest=FlywayMigrationIT
